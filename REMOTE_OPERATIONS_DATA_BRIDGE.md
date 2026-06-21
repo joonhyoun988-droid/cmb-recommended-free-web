@@ -9,6 +9,8 @@ Receipt: `REMOTE_OPERATIONS_DATA_BRIDGE_RECEIPT`
 - Proven remote CI run: not yet
 - Preview operational: not yet
 - Production RUM monitoring: not yet
+- GitHub auth: `blocked_by_invalid_gh_token`
+- Local Git commit: `c61fa0c`
 
 No-overclaim: CMB currently has local static/frontend proof and a CI-ready workflow template. It must not be called remote-proven until a GitHub Actions run URL and retained artifact exist.
 
@@ -36,6 +38,7 @@ No-overclaim: CMB currently has local static/frontend proof and a CI-ready workf
 - rollback: restore previous git commit or prior packaged folder
 - run_url: not yet
 - artifact_path: not yet
+- remote_handoff: `GITHUB_REMOTE_HANDOFF.md`
 
 ## Remote CI Promotion Rule
 
