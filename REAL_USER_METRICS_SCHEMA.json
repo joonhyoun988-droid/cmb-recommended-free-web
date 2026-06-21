@@ -1,0 +1,43 @@
+{
+  "schema": "cmb.real_user_metrics.v1",
+  "status": "ready_not_live",
+  "privacy": {
+    "noSecrets": true,
+    "noSensitivePII": true,
+    "purpose": "Measure page speed, save latency, and field usability.",
+    "retentionDays": 30,
+    "sampling": "10-100 percent depending on traffic volume"
+  },
+  "webVitals": {
+    "LCP": {
+      "description": "Largest Contentful Paint",
+      "unit": "milliseconds"
+    },
+    "INP": {
+      "description": "Interaction to Next Paint",
+      "unit": "milliseconds"
+    },
+    "CLS": {
+      "description": "Cumulative Layout Shift",
+      "unit": "score"
+    }
+  },
+  "eventFields": [
+    "eventName",
+    "route",
+    "device",
+    "viewport",
+    "connectionType",
+    "timestamp",
+    "appVersion",
+    "proofLevel"
+  ],
+  "events": [
+    "cmb.page_view",
+    "cmb.inventory_save_clicked",
+    "cmb.inventory_save_completed",
+    "cmb.inventory_save_failed",
+    "cmb.operator_login_completed",
+    "cmb.operator_login_failed"
+  ]
+}

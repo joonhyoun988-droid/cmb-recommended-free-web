@@ -1,0 +1,65 @@
+name: CMB Frontend Proof
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  frontend-proof:
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install browser QA dependencies
+        shell: pwsh
+        run: |
+          npm install --no-audit --no-fund @playwright/test lighthouse @axe-core/cli chromedriver
+          npx playwright install chromium
+
+      - name: Run CMB frontend proof stack
+        shell: pwsh
+        run: |
+          ./run_cmb_frontend_proof_stack.ps1 -NodePath "node" -ChromePath "C:\Program Files\Google\Chrome\Application\chrome.exe" -ChromeDriverPath ".\node_modules\.bin\chromedriver.cmd"
+
+      - name: Write job summary
+        if: always()
+        shell: pwsh
+        run: |
+          "## CMB Frontend Proof" >> $env:GITHUB_STEP_SUMMARY
+          Get-Content -LiteralPath "WORLD_CLASS_FRONTEND_PROOF_STACK.md" -ErrorAction SilentlyContinue >> $env:GITHUB_STEP_SUMMARY
+          Get-Content -LiteralPath "VISUAL_DIFF_QA_REPORT.md" -ErrorAction SilentlyContinue >> $env:GITHUB_STEP_SUMMARY
+          Get-Content -LiteralPath "INTERACTION_SCENARIO_QA_REPORT.md" -ErrorAction SilentlyContinue >> $env:GITHUB_STEP_SUMMARY
+          Get-Content -LiteralPath "ACCESSIBILITY_AUDIT_REPORT.md" -ErrorAction SilentlyContinue >> $env:GITHUB_STEP_SUMMARY
+          Get-Content -LiteralPath "LIGHTHOUSE_QA_REPORT.md" -ErrorAction SilentlyContinue >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload QA artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cmb-frontend-proof-${{ github.sha }}
+          retention-days: 30
+          path: |
+            WORLD_CLASS_FRONTEND_PROOF_STACK.md
+            VISUAL_DIFF_QA_REPORT.md
+            visual-diff-summary.json
+            visual_diff_desktop.png
+            visual_diff_mobile.png
+            INTERACTION_SCENARIO_QA_REPORT.md
+            interaction-scenario-summary.json
+            playwright-critical-flow-report.json
+            ACCESSIBILITY_AUDIT_REPORT.md
+            axe-report.json
+            axe-summary.json
+            LIGHTHOUSE_QA_REPORT.md
+            lighthouse-report.json
+            WCAG_REVIEW_SCOPE.md
+            QA_ARTIFACT_MANIFEST.json

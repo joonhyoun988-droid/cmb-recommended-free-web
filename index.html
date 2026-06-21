@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#12201c">
+    <title>CMB 재고 실사 콘솔</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="CMB 작업 메뉴">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">C</div>
+          <div>
+            <strong>CMB 재고</strong>
+            <span>현장 실사 콘솔</span>
+          </div>
+        </div>
+
+        <section class="operator-box" aria-label="작업자 로그인">
+          <p class="eyebrow">작업자</p>
+          <strong id="operatorLabel">로그인 필요</strong>
+          <button class="ghost-btn" type="button" id="loginToggle">로그인</button>
+          <button class="ghost-btn is-muted" type="button" id="logoutBtn">로그아웃</button>
+          <small>공개 데모 계정: DEMO01 / 0000</small>
+        </section>
+
+        <nav class="nav-list" aria-label="주요 화면">
+          <a href="#workbench" class="is-active">실사 작업</a>
+          <a href="#inventory">재고판</a>
+          <a href="#mobile">모바일 입력</a>
+          <a href="#audit">감사 로그</a>
+          <a href="#settings">연동 설정</a>
+        </nav>
+
+        <div class="sync-meter" aria-live="polite">
+          <span id="syncStateDot"></span>
+          <div>
+            <strong id="syncState">대기 중</strong>
+            <small id="syncHint">2층 창고 · 완제품 기준</small>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="topbar-copy">
+            <p class="eyebrow">CMB Inventory Command</p>
+            <h1>재고 실사 작업대</h1>
+            <p class="topbar-subcopy">수량 입력은 화면에 즉시 반영하고, 서버 저장은 대기열에서 추적합니다.</p>
+            <div class="scope-chips" aria-label="현재 작업 범위">
+              <span id="scopeWarehouse">2층 창고</span>
+              <span id="scopeField">완제품</span>
+              <span id="scopeOperator">로그인 필요</span>
+            </div>
+          </div>
+          <div class="command-panel" aria-label="작업 명령">
+            <button class="secondary-btn" type="button" id="resetDemoBtn">샘플 초기화</button>
+            <button class="primary-btn" type="button" id="flushNowBtn">미전송 보내기</button>
+          </div>
+        </header>
+
+        <section class="status-strip" aria-label="오늘 상태">
+          <article>
+            <span>대상 품목</span>
+            <strong id="kpiItems">0</strong>
+          </article>
+          <article>
+            <span>미전송</span>
+            <strong id="kpiQueue">0</strong>
+          </article>
+          <article>
+            <span>차이 품목</span>
+            <strong id="kpiDiff">0</strong>
+          </article>
+          <article>
+            <span>화면 반응</span>
+            <strong id="kpiLatency">0.0초</strong>
+          </article>
+        </section>
+
+        <section class="workbench" id="workbench">
+          <div class="workbench-head">
+            <div>
+              <p class="eyebrow">실사 작업대</p>
+              <h2>품목을 찾고 수량을 바로 확정합니다</h2>
+            </div>
+            <div class="filters" aria-label="재고 필터">
+              <label>
+                <span>검색</span>
+                <input id="searchInput" type="search" placeholder="품목코드 / 제품명">
+              </label>
+              <label>
+                <span>창고</span>
+                <select id="warehouseSelect">
+                  <option value="2층 창고">2층 창고</option>
+                  <option value="1층 창고">1층 창고</option>
+                </select>
+              </label>
+              <label>
+                <span>구역</span>
+                <select id="fieldSelect">
+                  <option value="finished">완제품</option>
+                  <option value="label">라벨</option>
+                  <option value="container">용기</option>
+                  <option value="cap">뚜껑</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="operating-grid">
+            <section class="panel inventory-panel" id="inventory" aria-label="현재 재고">
+              <div class="panel-title">
+                <div>
+                  <p class="eyebrow">재고판</p>
+                  <h3>품목별 현재 수량</h3>
+                </div>
+                <button class="secondary-btn compact" type="button" id="exportBtn">CSV</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>코드</th>
+                      <th>품목</th>
+                      <th>구역</th>
+                      <th>총 재고</th>
+                      <th>선택 창고</th>
+                      <th>상태</th>
+                    </tr>
+                  </thead>
+                  <tbody id="inventoryBody"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel mobile-panel" id="mobile" aria-label="폰 실사">
+              <div class="panel-title">
+                <div>
+                  <p class="eyebrow">폰 실사</p>
+                  <h3>수량 입력</h3>
+                </div>
+                <span class="badge" id="mobileModeBadge">즉시 반영</span>
+              </div>
+              <div id="countList" class="count-list"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="ops-row">
+          <section class="panel queue-panel" aria-label="미전송 저장">
+            <div class="panel-title">
+              <div>
+                <p class="eyebrow">저장 대기열</p>
+                <h3>서버에 보낼 변경</h3>
+              </div>
+              <span id="queueBadge" class="badge is-warn">0건</span>
+            </div>
+            <div id="queueList" class="queue-list"></div>
+          </section>
+
+          <section class="panel map-panel" aria-label="창고 상태 시각화">
+            <div class="panel-title">
+              <div>
+                <p class="eyebrow">창고 맵</p>
+                <h3>선택 창고 집중 보기</h3>
+              </div>
+              <span class="badge is-blue">실시간</span>
+            </div>
+            <div class="warehouse-map" id="warehouseMap" aria-hidden="true"></div>
+          </section>
+
+          <section class="panel settings-panel" id="settings" aria-label="무료 운영 설정">
+            <div class="panel-title">
+              <div>
+                <p class="eyebrow">연동 설정</p>
+                <h3>Google Sheets 연결</h3>
+              </div>
+            </div>
+            <label class="stacked-label">
+              <span>Apps Script Web App URL</span>
+              <input id="endpointInput" type="url" placeholder="https://script.google.com/macros/s/.../exec">
+            </label>
+            <button class="secondary-btn" type="button" id="saveEndpointBtn">연결 주소 저장</button>
+            <p class="small-note">주소가 없으면 브라우저 내부 저장소로 무료 데모를 운영합니다.</p>
+          </section>
+        </section>
+
+        <section class="panel audit-panel" id="audit" aria-label="감사 로그">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">감사 로그</p>
+              <h3>누가, 언제, 무엇을 바꿨는지</h3>
+            </div>
+            <span class="badge is-blue" id="auditCount">0건</span>
+          </div>
+          <div class="audit-list" id="auditList"></div>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="login-dialog" id="loginDialog">
+      <form method="dialog" id="loginForm">
+        <p class="eyebrow">작업자 인증</p>
+        <h2>작업자 ID로 시작합니다</h2>
+        <label>
+          <span>작업자 ID</span>
+          <input id="operatorIdInput" autocomplete="username" value="DEMO01">
+        </label>
+        <label>
+          <span>PIN</span>
+          <input id="pinInput" autocomplete="current-password" inputmode="numeric" type="password" value="0000">
+        </label>
+        <div class="dialog-actions">
+          <button class="secondary-btn" value="cancel" type="button" id="cancelLoginBtn">취소</button>
+          <button class="primary-btn" value="default" type="submit">로그인</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>

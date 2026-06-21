@@ -1,0 +1,9 @@
+{
+  "name": "cmb-recommended-free-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "proof": "powershell -NoProfile -ExecutionPolicy Bypass -File ./run_cmb_frontend_proof_stack.ps1"
+  }
+}

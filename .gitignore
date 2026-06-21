@@ -1,0 +1,25 @@
+# Dependencies and temp files
+node_modules/
+.qa-temp/
+test-results/
+_site/
+
+# Generated QA artifacts
+axe-report.json
+axe-summary.json
+lighthouse-report.json
+playwright-critical-flow-report.json
+visual-diff-summary.json
+interaction-scenario-summary.json
+QA_ARTIFACT_MANIFEST.json
+axe-cli-output.txt
+lighthouse-cli-output.txt
+
+# Generated screenshots and diffs
+*.png
+
+# Local environment and credentials
+.env
+.env.*
+*.pem
+*.key
