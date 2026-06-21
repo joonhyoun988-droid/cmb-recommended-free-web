@@ -2,27 +2,9 @@ name: CMB Frontend Proof
 
 on:
   push:
-    paths:
-      - "index.html"
-      - "styles.css"
-      - "app.js"
-      - "rum_web_vitals_client.js"
-      - "runtime_observability_client.js"
-      - "package.json"
-      - "qa/**"
-      - "run_cmb_frontend_proof_stack.ps1"
-      - ".github/workflows/cmb-frontend-proof.yml"
+    branches:
+      - main
   pull_request:
-    paths:
-      - "index.html"
-      - "styles.css"
-      - "app.js"
-      - "rum_web_vitals_client.js"
-      - "runtime_observability_client.js"
-      - "package.json"
-      - "qa/**"
-      - "run_cmb_frontend_proof_stack.ps1"
-      - ".github/workflows/cmb-frontend-proof.yml"
   workflow_dispatch:
 
 jobs:

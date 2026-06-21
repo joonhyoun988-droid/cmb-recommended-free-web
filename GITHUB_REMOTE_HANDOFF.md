@@ -22,11 +22,12 @@ Logged in to github.com account joonhyoun988-droid
 
 - Repository: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web`
 - Pages URL: `https://joonhyoun988-droid.github.io/cmb-recommended-free-web/`
-- Latest app/workflow proof SHA: `7a3cee53f8798c2dbe1bbbcc8cfbedf58f9bd03a`
-- Latest frontend proof run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910793774`
-- Latest Pages deploy run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910793775`
-- Artifact: `cmb-frontend-proof-7a3cee53f8798c2dbe1bbbcc8cfbedf58f9bd03a`
-- Artifact API: `https://api.github.com/repos/joonhyoun988-droid/cmb-recommended-free-web/actions/artifacts/7777281550`
+- Latest app/workflow proof SHA: `eaa6a1ddab545698fb4c2213c1e1fe319ea5192c`
+- Latest frontend proof run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27911356863`
+- Latest Pages deploy run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27911356885`
+- Required check: branch protection requires always-on `frontend-proof`
+- Artifact: `cmb-frontend-proof-eaa6a1ddab545698fb4c2213c1e1fe319ea5192c`
+- Artifact API: `https://api.github.com/repos/joonhyoun988-droid/cmb-recommended-free-web/actions/artifacts/7777448041`
 
 ## Auth Lifecycle Guard
 
