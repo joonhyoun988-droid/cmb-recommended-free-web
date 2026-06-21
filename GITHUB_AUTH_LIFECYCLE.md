@@ -1,6 +1,6 @@
 # GitHub Auth Lifecycle
 
-Status: `blocked_by_invalid_gh_token`
+Status: `ok_with_refresh_route`
 
 This file keeps the CMB public-preview deployment from getting stuck when the local GitHub CLI login expires.
 
@@ -52,6 +52,13 @@ Or use the project wrapper that does auth preflight, refresh/login fallback, rem
 ```powershell
 .\deploy_github_remote.ps1
 ```
+
+Current remote:
+
+- Repository: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web`
+- Pages URL: `https://joonhyoun988-droid.github.io/cmb-recommended-free-web/`
+- Latest successful frontend proof run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910372365`
+- Latest successful Pages deploy run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910408479`
 
 ## Do Not Do This
 

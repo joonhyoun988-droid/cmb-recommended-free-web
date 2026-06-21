@@ -1,6 +1,6 @@
 # GitHub Remote Handoff
 
-Status: `blocked_by_github_auth`
+Status: `remote_created_and_preview_deployed`
 
 Local commits prepared:
 
@@ -11,13 +11,21 @@ c61fa0c Prepare CMB public preview pipeline
 
 ## Why It Is Blocked
 
-GitHub CLI is installed, but the current token is invalid.
+This was previously blocked because the GitHub CLI token was invalid. It is now resolved.
 
 ```text
-gh auth status
-X Failed to log in to github.com account joonhyoun988-droid
-The token in default is invalid.
+gh auth status -h github.com
+Logged in to github.com account joonhyoun988-droid
 ```
+
+## Remote Evidence
+
+- Repository: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web`
+- Pages URL: `https://joonhyoun988-droid.github.io/cmb-recommended-free-web/`
+- Latest frontend proof run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910372365`
+- Latest Pages deploy run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910408479`
+- Artifact: `cmb-frontend-proof-c2bf1f2072a4525e76e9c06d4ffdc04360735dd9`
+- Artifact API: `https://api.github.com/repos/joonhyoun988-droid/cmb-recommended-free-web/actions/artifacts/7777155529`
 
 ## Auth Lifecycle Guard
 
@@ -36,7 +44,7 @@ If it reports `WARN`, use the safe refresh/login route:
 
 The script never prints tokens. It only checks whether the local GitHub CLI login is healthy.
 
-## Resume After Login
+## Resume / Repeat Later
 
 Beginner translation:
 
@@ -46,7 +54,7 @@ Beginner translation:
 - `workflow`: GitHub's remote verification job.
 - `Pages`: GitHub's free static website hosting.
 
-Run after GitHub login succeeds:
+Run after future GitHub login succeeds or when pushing a new change:
 
 ```powershell
 .\check_github_auth.ps1
@@ -54,7 +62,7 @@ Run after GitHub login succeeds:
 gh run list --limit 5
 ```
 
-Expected public preview URL after the Pages workflow succeeds:
+Public preview URL:
 
 ```text
 https://joonhyoun988-droid.github.io/cmb-recommended-free-web/
@@ -62,15 +70,15 @@ https://joonhyoun988-droid.github.io/cmb-recommended-free-web/
 
 ## Required Evidence After Push
 
-Add these back into `REMOTE_OPERATIONS_DATA_BRIDGE.md`:
+Already added back into `REMOTE_OPERATIONS_DATA_BRIDGE.md`:
 
 - GitHub repository URL
 - latest `CMB Frontend Proof` run URL
 - latest `Deploy CMB Preview` run URL
 - GitHub Pages preview URL
 - artifact URL or run artifact name
-- proof level promoted from `remote_ci_ready` to `remote_ci_proven` only after the workflow passes
-- proof level promoted to `preview_operational` only after the Pages URL loads
+- proof level promoted from `remote_ci_ready` to `remote_ci_proven` after the workflow passed
+- proof level promoted to `preview_operational` after the Pages URL returned HTTP 200
 
 ## Safety Boundary
 
