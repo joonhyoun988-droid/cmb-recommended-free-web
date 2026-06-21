@@ -10,7 +10,8 @@ Receipt: `REMOTE_OPERATIONS_DATA_BRIDGE_RECEIPT`
 - Preview operational: not yet
 - Production RUM monitoring: not yet
 - GitHub auth: `blocked_by_invalid_gh_token`
-- Local Git commit: `c61fa0c`
+- GitHub auth lifecycle: `GITHUB_AUTH_LIFECYCLE.md`, `check_github_auth.ps1`
+- Local Git commit: see latest local `git log -1 --oneline`
 
 No-overclaim: CMB currently has local static/frontend proof and a CI-ready workflow template. It must not be called remote-proven until a GitHub Actions run URL and retained artifact exist.
 
@@ -29,6 +30,7 @@ No-overclaim: CMB currently has local static/frontend proof and a CI-ready workf
 | `PRIVACY_CONSENT_LANE` | READY | `REAL_USER_DATA_PRIVACY_BOUNDARY.md` | Review before collecting live user data. |
 | `NO_OVERCLAIM_LANE` | PASS | `remote_ci_ready`, not `remote_ci_proven` | Final answers must keep this distinction. |
 | `V7_98_HANDOFF_LANE` | READY | Use `WORLD_CLASS_REMOTE_CI_VAULT_EVIDENCE_MESH_V7_98` for remote run/vault/provenance proof | Run v7.98 once external proof is claimed. |
+| `GITHUB_AUTH_LIFECYCLE_GUARD_V8_06` | WARN | `blocked_by_invalid_gh_token`; refresh/login route exists | Run `.\check_github_auth.ps1`, then refresh/login, then resume repo create. |
 
 ## Deployment Slots
 
@@ -39,6 +41,9 @@ No-overclaim: CMB currently has local static/frontend proof and a CI-ready workf
 - run_url: not yet
 - artifact_path: not yet
 - remote_handoff: `GITHUB_REMOTE_HANDOFF.md`
+- auth_preflight: `.\check_github_auth.ps1`
+- auth_refresh: `gh auth refresh -h github.com -s repo,workflow`
+- auth_login_fallback: `gh auth login -h github.com -p https -w`
 
 ## Remote CI Promotion Rule
 

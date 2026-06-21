@@ -2,10 +2,11 @@
 
 Status: `blocked_by_github_auth`
 
-Local commit prepared:
+Local commits prepared:
 
 ```text
 c61fa0c Prepare CMB public preview pipeline
+52d98fe Document GitHub remote handoff blocker
 ```
 
 ## Why It Is Blocked
@@ -17,6 +18,23 @@ gh auth status
 X Failed to log in to github.com account joonhyoun988-droid
 The token in default is invalid.
 ```
+
+## Auth Lifecycle Guard
+
+Use the project guard before every GitHub remote step:
+
+```powershell
+.\check_github_auth.ps1
+```
+
+If it reports `WARN`, use the safe refresh/login route:
+
+```powershell
+.\check_github_auth.ps1 -TryRefresh
+.\check_github_auth.ps1 -OpenLogin
+```
+
+The script never prints tokens. It only checks whether the local GitHub CLI login is healthy.
 
 ## Resume After Login
 
@@ -31,6 +49,7 @@ Beginner translation:
 Run after GitHub login succeeds:
 
 ```powershell
+.\check_github_auth.ps1
 gh repo create cmb-recommended-free-web --public --source . --remote origin --push
 gh run list --limit 5
 ```
