@@ -8,6 +8,8 @@ on:
       - "index.html"
       - "styles.css"
       - "app.js"
+      - "rum_web_vitals_client.js"
+      - "runtime_observability_client.js"
       - ".github/workflows/cmb-pages.yml"
   workflow_dispatch:
 
@@ -33,6 +35,8 @@ jobs:
           cp index.html _site/index.html
           cp styles.css _site/styles.css
           cp app.js _site/app.js
+          cp rum_web_vitals_client.js _site/rum_web_vitals_client.js
+          cp runtime_observability_client.js _site/runtime_observability_client.js
           printf '{"proofLevel":"preview_operational_candidate","source":"github-pages"}\n' > _site/version.json
 
       - name: Configure Pages
