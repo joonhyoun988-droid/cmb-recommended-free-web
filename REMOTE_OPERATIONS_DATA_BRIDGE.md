@@ -13,11 +13,14 @@ Receipt: `REMOTE_OPERATIONS_DATA_BRIDGE_RECEIPT`
 - GitHub Pages URL: `https://joonhyoun988-droid.github.io/cmb-recommended-free-web/`
 - GitHub auth: `ok`
 - GitHub auth lifecycle: `GITHUB_AUTH_LIFECYCLE.md`, `check_github_auth.ps1`
-- Local Git commit: `c2bf1f2`
-- Remote CI run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910372365`
-- Pages deploy run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910408479`
-- Artifact: `cmb-frontend-proof-c2bf1f2072a4525e76e9c06d4ffdc04360735dd9`
-- Artifact API: `https://api.github.com/repos/joonhyoun988-droid/cmb-recommended-free-web/actions/artifacts/7777155529`
+- Latest app/workflow proof commit: `7a3cee5`
+- Latest app/workflow proof SHA: `7a3cee53f8798c2dbe1bbbcc8cfbedf58f9bd03a`
+- Remote CI run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910793774`
+- Pages deploy run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910793775`
+- Artifact: `cmb-frontend-proof-7a3cee53f8798c2dbe1bbbcc8cfbedf58f9bd03a`
+- Artifact API: `https://api.github.com/repos/joonhyoun988-droid/cmb-recommended-free-web/actions/artifacts/7777281550`
+- Artifact digest: `sha256:6284dcd0a2807c0756dc7ed554a381c72e8ecd0c50057e4f2a97df7e11b69e78`
+- Artifact expires: `2026-07-21T16:42:36Z`
 
 No-overclaim: CMB now has remote CI proof and an operational GitHub Pages preview. It must not be called production RUM monitoring until real-user Web Vitals and operations telemetry are live.
 
@@ -26,10 +29,10 @@ No-overclaim: CMB now has remote CI proof and an operational GitHub Pages previe
 | Lane | Status | Evidence | Next action |
 |---|---|---|---|
 | `LOCAL_PROOF_BASELINE_LANE` | PASS | `WORLD_CLASS_FRONTEND_PROOF_STACK.md`, `QA_ARTIFACT_MANIFEST.json`, visual/interaction/axe/Lighthouse reports | Keep proof current after UI changes. |
-| `REMOTE_CI_WORKFLOW_LANE` | PASS | `.github/workflows/cmb-frontend-proof.yml`; run `27910372365` succeeded | Keep workflow required for future changes. |
+| `REMOTE_CI_WORKFLOW_LANE` | PASS | `.github/workflows/cmb-frontend-proof.yml`; run `27910793774` succeeded | Keep workflow required for future changes. |
 | `REMOTE_REQUIRED_STATUS_LANE` | WARN | required status check is plan-blocked until repo/ruleset is configured | Enable branch protection/ruleset when the repo is active. |
-| `REMOTE_ARTIFACT_RETENTION_LANE` | PASS | artifact `cmb-frontend-proof-c2bf1f2072a4525e76e9c06d4ffdc04360735dd9`, expires `2026-07-21T16:26:13Z` | Keep 30-day artifact retention or move durable records to vault. |
-| `PREVIEW_DEPLOYMENT_LANE` | PASS | Pages URL HTTP 200; deploy run `27910408479` succeeded | Add deeper health checks as the app grows. |
+| `REMOTE_ARTIFACT_RETENTION_LANE` | PASS | artifact `cmb-frontend-proof-7a3cee53f8798c2dbe1bbbcc8cfbedf58f9bd03a`, expires `2026-07-21T16:42:36Z` | Keep 30-day artifact retention or move durable records to vault. |
+| `PREVIEW_DEPLOYMENT_LANE` | PASS | Pages URL HTTP 200; deploy run `27910793775` succeeded | Add deeper health checks as the app grows. |
 | `OPERABILITY_TELEMETRY_LANE` | READY | `OPERATIONS_TELEMETRY_PLAN.md` | Connect logs/metrics/traces provider after deployment. |
 | `RUM_WEB_VITALS_LANE` | READY | `REAL_USER_METRICS_SCHEMA.json` | Collect only after privacy review and deployment. |
 | `DORA_INCIDENT_LANE` | READY | `DORA_METRICS_PLAN.md` | Fill real values after recurring releases. |
@@ -44,8 +47,9 @@ No-overclaim: CMB now has remote CI proof and an operational GitHub Pages previe
 - environment: GitHub Pages
 - health_check: HTTP 200 and critical flow proof
 - rollback: restore previous git commit or prior packaged folder
-- run_url: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910372365`
-- artifact_path: `cmb-frontend-proof-c2bf1f2072a4525e76e9c06d4ffdc04360735dd9`
+- run_url: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910793774`
+- artifact_path: `cmb-frontend-proof-7a3cee53f8798c2dbe1bbbcc8cfbedf58f9bd03a`
+- evidence_snapshot_command: `.\collect_github_remote_evidence.ps1`
 - remote_handoff: `GITHUB_REMOTE_HANDOFF.md`
 - auth_preflight: `.\check_github_auth.ps1`
 - auth_refresh: `gh auth refresh -h github.com -s repo,workflow`

@@ -22,10 +22,11 @@ Logged in to github.com account joonhyoun988-droid
 
 - Repository: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web`
 - Pages URL: `https://joonhyoun988-droid.github.io/cmb-recommended-free-web/`
-- Latest frontend proof run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910372365`
-- Latest Pages deploy run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910408479`
-- Artifact: `cmb-frontend-proof-c2bf1f2072a4525e76e9c06d4ffdc04360735dd9`
-- Artifact API: `https://api.github.com/repos/joonhyoun988-droid/cmb-recommended-free-web/actions/artifacts/7777155529`
+- Latest app/workflow proof SHA: `7a3cee53f8798c2dbe1bbbcc8cfbedf58f9bd03a`
+- Latest frontend proof run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910793774`
+- Latest Pages deploy run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910793775`
+- Artifact: `cmb-frontend-proof-7a3cee53f8798c2dbe1bbbcc8cfbedf58f9bd03a`
+- Artifact API: `https://api.github.com/repos/joonhyoun988-droid/cmb-recommended-free-web/actions/artifacts/7777281550`
 
 ## Auth Lifecycle Guard
 
@@ -59,6 +60,7 @@ Run after future GitHub login succeeds or when pushing a new change:
 ```powershell
 .\check_github_auth.ps1
 .\deploy_github_remote.ps1
+.\collect_github_remote_evidence.ps1
 gh run list --limit 5
 ```
 

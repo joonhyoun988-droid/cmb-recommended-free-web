@@ -57,8 +57,9 @@ Current remote:
 
 - Repository: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web`
 - Pages URL: `https://joonhyoun988-droid.github.io/cmb-recommended-free-web/`
-- Latest successful frontend proof run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910372365`
-- Latest successful Pages deploy run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910408479`
+- Latest app/workflow proof SHA: `7a3cee53f8798c2dbe1bbbcc8cfbedf58f9bd03a`
+- Latest successful frontend proof run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910793774`
+- Latest successful Pages deploy run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27910793775`
 
 ## Do Not Do This
 
