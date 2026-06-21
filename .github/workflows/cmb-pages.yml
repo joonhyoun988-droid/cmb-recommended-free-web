@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "index.html"
+      - "styles.css"
+      - "app.js"
+      - ".github/workflows/cmb-pages.yml"
   workflow_dispatch:
 
 permissions:

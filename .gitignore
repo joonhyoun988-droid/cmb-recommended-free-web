@@ -2,6 +2,7 @@
 node_modules/
 .qa-temp/
 test-results/
+REMOTE_EVIDENCE_SNAPSHOT.json
 _site/
 
 # Generated QA artifacts
