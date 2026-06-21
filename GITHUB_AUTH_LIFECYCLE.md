@@ -47,6 +47,12 @@ gh auth status -h github.com
 gh repo create cmb-recommended-free-web --public --source . --remote origin --push
 ```
 
+Or use the project wrapper that does auth preflight, refresh/login fallback, remote check, push, and run listing:
+
+```powershell
+.\deploy_github_remote.ps1
+```
+
 ## Do Not Do This
 
 ```powershell

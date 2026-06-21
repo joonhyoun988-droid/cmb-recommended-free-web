@@ -50,7 +50,7 @@ Run after GitHub login succeeds:
 
 ```powershell
 .\check_github_auth.ps1
-gh repo create cmb-recommended-free-web --public --source . --remote origin --push
+.\deploy_github_remote.ps1
 gh run list --limit 5
 ```
 
