@@ -58,6 +58,8 @@ jobs:
             INTERACTION_SCENARIO_QA_REPORT.md
             interaction-scenario-summary.json
             playwright-critical-flow-report.json
+            platform-scenario-summary.json
+            platform-scenario-report.json
             ACCESSIBILITY_AUDIT_REPORT.md
             axe-report.json
             axe-summary.json

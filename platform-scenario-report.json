@@ -1,0 +1,28 @@
+﻿{
+  "status": "PASS",
+  "passedScenarios": 3,
+  "failedScenarios": 0,
+  "checkedAt": "2026-06-22T05:05:12.222Z",
+  "scenario": {
+    "dashboard": {
+      "title": "CMB Platform Dashboard",
+      "hasRadar": true,
+      "hasRequiredRuleset": true,
+      "hasComponentLink": true
+    },
+    "workshop": {
+      "title": "CMB Component Workshop",
+      "hasTokens": true,
+      "hasButtons": true,
+      "hasAccessibility": true
+    },
+    "telemetry": {
+      "rumReady": true,
+      "opsReady": true,
+      "sentryDisabled": true,
+      "rumEndpointConfigured": false,
+      "opsEndpointConfigured": false
+    },
+    "passed": true
+  }
+}

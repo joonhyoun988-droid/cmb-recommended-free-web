@@ -19,6 +19,11 @@ Project: `C:\Users\joonh\Documents\Codex\CMB_RECOMMENDED_FREE_WEB`
 | Platform circulation | DOCUMENTED_LOOP | `PLATFORM_CIRCULATION_LOOP.md` | Keep criteria, adoption, evidence, operations, recovery, and design judgment circulating. |
 | Upgrade demand | ADOPTED | `UPGRADE_DEMAND_GOVERNOR.md` | Batch non-urgent ideas and protect project delivery focus. |
 | Free toolchain radar | RADAR_ADOPTED | `WORLD_CLASS_FREE_TOOLCHAIN_RADAR.md` | Use Adopt/Pilot/Queue/Reject before connecting free external gears. |
+| GitHub Projects queue | SCRIPT_READY | `setup_github_projects_board.ps1`, `GITHUB_PROJECTS_QUEUE.md` | Create external board only after `gh auth refresh -s project`. |
+| Cloudflare telemetry pilot | PILOT_READY_NOT_DEPLOYED | `cloudflare/telemetry-worker.js`, `deploy_cloudflare_telemetry_worker.ps1` | Deploy only after privacy/retention decision. |
+| Sentry Free pilot | PILOT_READY_DSN_EMPTY | `sentry_config.js`, `sentry_browser_bridge.js` | Set DSN only after owner-approved data boundary. |
+| Storybook pilot | PILOT_READY_NOT_INSTALLED | `.storybook/main.js`, `stories/cmb-components.stories.js` | Install when reusable components exceed static workshop. |
+| Extended Playwright scenarios | ADOPTED | `qa/cmb-platform-scenarios-cdp.mjs` | Keep dashboard/workshop/telemetry scenario proof in CI. |
 | No-overclaim | PASS | READY_LOCAL / NEXT / NOT_YET / preview_operational | Do not call this production platform parity yet. |
 
 ## Next Forced Action

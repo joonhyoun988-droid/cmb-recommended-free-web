@@ -19,11 +19,16 @@ Project: `C:\Users\joonh\Documents\Codex\CMB_RECOMMENDED_FREE_WEB`
 | Generated web cockpit | PRESENT | `platform-dashboard.html`, `platform-dashboard-data.json` | closes markdown-only cockpit gap | Refresh JSON after proof runs. |
 | Platform gap execution closure | PRESENT | `PLATFORM_GAP_EXECUTION_CLOSURE.md` | closes v8.16 execution gap lanes | Keep endpoint/workshop/PR evidence linked. |
 | Free toolchain radar | PRESENT | `WORLD_CLASS_FREE_TOOLCHAIN_RADAR.md` | v8.17 free external gear recommendation engine | Score candidates before adopting or piloting tools. |
+| GitHub Projects queue | PRESENT | `setup_github_projects_board.ps1`, `GITHUB_PROJECTS_QUEUE.md` | external board script and schema | Use dry-run before creating board. |
+| Cloudflare telemetry pilot | PRESENT | `cloudflare/telemetry-worker.js`, `CLOUDFLARE_TELEMETRY_ENDPOINT.md` | central RUM/ops endpoint path | Deploy only after privacy/retention decision. |
+| Sentry Free pilot | PRESENT | `sentry_config.js`, `SENTRY_FREE_OBSERVABILITY.md` | alerting bridge with empty DSN | Set DSN only after data boundary approval. |
+| Storybook pilot | PRESENT | `.storybook/main.js`, `stories/cmb-components.stories.js` | living component workshop path | Install when component reuse justifies it. |
+| Extended Playwright scenarios | PRESENT | `qa/cmb-platform-scenarios-cdp.mjs`, `PLAYWRIGHT_SCENARIO_EXPANSION.md` | more real browser proof | Keep in local and CI proof stack. |
 
 ```text
 MIGRATION_COCKPIT_RECEIPT:
 - project_path: C:\Users\joonh\Documents\Codex\CMB_RECOMMENDED_FREE_WEB
-- active_criteria_count: 10
+- active_criteria_count: 15
 - missing_criteria_count: 0
 - migration_queue_path: PROJECT_MIGRATION_QUEUE.md
 - generated_cockpit_path: GENERATED_PLATFORM_COCKPIT.md

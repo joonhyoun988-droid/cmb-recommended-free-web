@@ -47,6 +47,36 @@
       "next": "Pilot Cloudflare/Sentry/Storybook only after Adopt/Pilot/Queue/Reject scoring stays visible."
     },
     {
+      "name": "GitHub Projects queue",
+      "status": "SCRIPT_READY",
+      "evidence": "setup_github_projects_board.ps1, GITHUB_PROJECTS_QUEUE.md",
+      "next": "Create the external board only after project-scope auth is approved."
+    },
+    {
+      "name": "Cloudflare telemetry",
+      "status": "PILOT_READY_NOT_DEPLOYED",
+      "evidence": "cloudflare/telemetry-worker.js, deploy_cloudflare_telemetry_worker.ps1",
+      "next": "Deploy Worker only after privacy and retention policy are approved."
+    },
+    {
+      "name": "Sentry Free",
+      "status": "PILOT_READY_DSN_EMPTY",
+      "evidence": "sentry_config.js, sentry_browser_bridge.js",
+      "next": "Set DSN only after deciding what error data may leave the browser."
+    },
+    {
+      "name": "Storybook",
+      "status": "PILOT_READY_NOT_INSTALLED",
+      "evidence": ".storybook/main.js, stories/cmb-components.stories.js",
+      "next": "Install when reusable components exceed the static workshop."
+    },
+    {
+      "name": "Extended Playwright scenarios",
+      "status": "ADOPTED",
+      "evidence": "qa/cmb-platform-scenarios-cdp.mjs",
+      "next": "Keep dashboard, component workshop, and telemetry default proof in CI."
+    },
+    {
       "name": "Required ruleset",
       "status": "PARTIAL_ENV_BOUNDARY",
       "evidence": "GitHub required check is active on CMB; AI-OS ruleset proof remains plan/visibility boundary.",

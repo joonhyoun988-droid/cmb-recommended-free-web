@@ -17,6 +17,11 @@ Updated: 2026-06-22
 | Living component workshop | READY | `component-workshop.html`, `DESIGN_TOKENS.md`, `COMPONENT_INVENTORY.md` | Use before UI redesigns and after new components appear. |
 | PR draft bot | SCRIPT_READY | `create_project_adoption_pr.ps1` | Run `-DryRun`; use real PR only after clean worktree/auth checks. |
 | Free toolchain radar | RADAR_ADOPTED | `WORLD_CLASS_FREE_TOOLCHAIN_RADAR.md` | Use GitHub/Cloudflare/Sentry/Storybook/Playwright score before integration. |
+| GitHub Projects queue | SCRIPT_READY | `setup_github_projects_board.ps1`, `GITHUB_PROJECTS_QUEUE.md` | External board creation remains an owner/account side effect. |
+| Cloudflare telemetry | PILOT_READY_NOT_DEPLOYED | `cloudflare/telemetry-worker.js`, `CLOUDFLARE_TELEMETRY_ENDPOINT.md` | Endpoint not live until Worker deploy and config update. |
+| Sentry Free | PILOT_READY_DSN_EMPTY | `sentry_config.js`, `SENTRY_FREE_OBSERVABILITY.md` | DSN empty by default; no external error data leaves yet. |
+| Storybook | PILOT_READY_NOT_INSTALLED | `.storybook/main.js`, `stories/cmb-components.stories.js` | Static workshop remains live until Storybook install. |
+| Extended Playwright scenarios | ADOPTED | `qa/cmb-platform-scenarios-cdp.mjs`, platform scenario reports | Dashboard/workshop/telemetry defaults now covered. |
 | Project criteria adoption | PASS | `EFFICIENCY_GOVERNOR.md`, `RESPONSIVE_PREVIEW_QA.md`, `AUTOMATED_OPERATIONS_COCKPIT.md` | Keep active project docs updated when AI-OS adds relevant gates. |
 | Production RUM monitoring | NOT_YET | endpoint hook exists, central endpoint not deployed | Do not overclaim production monitoring. |
 | Live ops alerting | NOT_YET | alert rules exist, alert sink not deployed | Do not overclaim live alerting. |

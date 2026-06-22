@@ -23,6 +23,8 @@ $MobileDiff = Join-Path $Root "visual_diff_mobile.png"
 $VisualSummaryPath = Join-Path $Root "visual-diff-summary.json"
 $InteractionJsonPath = Join-Path $Root "interaction-scenario-summary.json"
 $PlaywrightRawPath = Join-Path $Root "playwright-critical-flow-report.json"
+$PlatformScenarioJsonPath = Join-Path $Root "platform-scenario-summary.json"
+$PlatformScenarioRawPath = Join-Path $Root "platform-scenario-report.json"
 $AxeJsonPath = Join-Path $Root "axe-report.json"
 $AxeSummaryPath = Join-Path $Root "axe-summary.json"
 $LighthouseJsonPath = Join-Path $Root "lighthouse-report.json"
@@ -177,6 +179,26 @@ try {
   }
   Write-JsonFile $InteractionJsonPath $interactionSummary
 
+  $platformScenarioScript = Join-Path $Root "qa\cmb-platform-scenarios-cdp.mjs"
+  $platformScenario = Invoke-CmdCapture "`"$NodePath`" `"$platformScenarioScript`" $Url `"$ChromePath`"" $PlatformScenarioRawPath
+  $platformScenarioJson = Get-JsonOrNull $PlatformScenarioRawPath
+  $platformPassedScenarios = 0
+  $platformFailedScenarios = 0
+  if ($platformScenarioJson -and $platformScenarioJson.status) {
+    $platformPassedScenarios = [int]$platformScenarioJson.passedScenarios
+    $platformFailedScenarios = [int]$platformScenarioJson.failedScenarios
+  }
+  $platformScenarioSummary = [ordered]@{
+    status = if ($platformScenario.exitCode -eq 0 -and $platformFailedScenarios -eq 0 -and $platformPassedScenarios -ge 1) { "PASS" } else { "FAIL" }
+    checkedAt = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss zzz")
+    exitCode = $platformScenario.exitCode
+    passedScenarios = $platformPassedScenarios
+    failedScenarios = $platformFailedScenarios
+    rawReport = "platform-scenario-report.json"
+    runner = "Chrome DevTools Protocol"
+  }
+  Write-JsonFile $PlatformScenarioJsonPath $platformScenarioSummary
+
   if ((Test-Path -LiteralPath $ChromePath) -and (Test-Path -LiteralPath $ChromeDriverPath)) {
     $axeCmd = "npx -y @axe-core/cli $Url --save axe-report.json --timeout 60 --chrome-path `"$ChromePath`" --chromedriver-path `"$ChromeDriverPath`" --no-reporter"
     $axeRun = Invoke-CmdCapture $axeCmd (Join-Path $Root "axe-cli-output.txt")
@@ -263,6 +285,12 @@ Failed scenarios: $failedScenarios
 Raw report: playwright-critical-flow-report.json
 Runner: Chrome DevTools Protocol, no local node_modules required
 
+Additional platform scenarios are tracked in platform-scenario-summary.json:
+
+- Platform dashboard includes the free toolchain radar.
+- Component workshop exposes design tokens and accessibility rules.
+- Telemetry and Sentry stay disabled by default until endpoints/DSN are approved.
+
 No-overclaim: this proves a local critical path, not every production workflow.
 "@
   Write-Utf8 (Join-Path $Root "INTERACTION_SCENARIO_QA_REPORT.md") $interactionReportText
@@ -336,6 +364,8 @@ No-overclaim: this is a local Lighthouse run, not production real-user monitorin
       "interaction-scenario-summary.json",
       "INTERACTION_SCENARIO_QA_REPORT.md",
       "playwright-critical-flow-report.json",
+      "platform-scenario-summary.json",
+      "platform-scenario-report.json",
       "axe-report.json",
       "axe-summary.json",
       "ACCESSIBILITY_AUDIT_REPORT.md",
@@ -346,6 +376,7 @@ No-overclaim: this is a local Lighthouse run, not production real-user monitorin
     statuses = [ordered]@{
       visual = $visualStatus
       interaction = $interactionSummary.status
+      platformScenario = $platformScenarioSummary.status
       accessibility = $accessibilityStatus
       lighthouse = $lighthouseStatus
     }
@@ -364,6 +395,7 @@ Preview: $Url
 |---|---|---|---|
 | Pixel diff threshold | $visualStatus | VISUAL_DIFF_QA_REPORT.md, visual-diff-summary.json | Keep baseline updates review-only. |
 | Interaction scenario | $($interactionSummary.status) | INTERACTION_SCENARIO_QA_REPORT.md | Add more CMB business paths as the product grows. |
+| Platform scenario | $($platformScenarioSummary.status) | platform-scenario-summary.json, platform-scenario-report.json | Keep dashboard, component workshop, and telemetry disabled-by-default proof current. |
 | axe accessibility automation | $accessibilityStatus | ACCESSIBILITY_AUDIT_REPORT.md, axe-report.json, axe-summary.json | Review axe incomplete/manual items before production. |
 | Lighthouse budget | $lighthouseStatus | LIGHTHOUSE_QA_REPORT.md, lighthouse-report.json | Raise budgets after production hosting exists. |
 | WCAG manual scope | PASS | WCAG_REVIEW_SCOPE.md | Complete human review for production claims. |
@@ -378,12 +410,13 @@ This closes the local static proof stack. Production-grade proof still needs hos
 "@
   Write-Utf8 (Join-Path $Root "WORLD_CLASS_FRONTEND_PROOF_STACK.md") $proofStackText
 
-  $overallStatus = if ($visualStatus -eq "PASS" -and $interactionSummary.status -eq "PASS" -and $accessibilityStatus -match "^PASS" -and $lighthouseStatus -eq "PASS") { "PASS" } else { "PASS_WITH_REVIEW" }
+  $overallStatus = if ($visualStatus -eq "PASS" -and $interactionSummary.status -eq "PASS" -and $platformScenarioSummary.status -eq "PASS" -and $accessibilityStatus -match "^PASS" -and $lighthouseStatus -eq "PASS") { "PASS" } else { "PASS_WITH_REVIEW" }
   $result = [ordered]@{
     status = $overallStatus
     checkedAt = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss zzz")
     visual = $visualStatus
     interaction = $interactionSummary.status
+    platformScenario = $platformScenarioSummary.status
     axeViolations = $axeViolations
     axeIncomplete = $axeIncomplete
     lighthousePerformance = $perfScore

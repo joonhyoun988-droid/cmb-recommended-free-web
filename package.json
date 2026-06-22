@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "proof": "powershell -NoProfile -ExecutionPolicy Bypass -File ./run_cmb_frontend_proof_stack.ps1"
+    "proof": "powershell -NoProfile -ExecutionPolicy Bypass -File ./run_cmb_frontend_proof_stack.ps1",
+    "storybook:install": "npm install --save-dev storybook @storybook/html-vite vite",
+    "storybook": "npx storybook dev -p 6006",
+    "build-storybook": "npx storybook build"
   }
 }

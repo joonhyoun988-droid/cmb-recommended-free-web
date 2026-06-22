@@ -9,6 +9,7 @@ Preview: http://127.0.0.1:8767/index.html
 |---|---|---|---|
 | Pixel diff threshold | PASS | VISUAL_DIFF_QA_REPORT.md, visual-diff-summary.json | Keep baseline updates review-only. |
 | Interaction scenario | PASS | INTERACTION_SCENARIO_QA_REPORT.md | Add more CMB business paths as the product grows. |
+| Platform scenario | PASS | platform-scenario-summary.json, platform-scenario-report.json | Keep dashboard, component workshop, and telemetry disabled-by-default proof current. |
 | axe accessibility automation | PASS_WITH_MANUAL_REVIEW | ACCESSIBILITY_AUDIT_REPORT.md, axe-report.json, axe-summary.json | Review axe incomplete/manual items before production. |
 | Lighthouse budget | PASS | LIGHTHOUSE_QA_REPORT.md, lighthouse-report.json | Raise budgets after production hosting exists. |
 | WCAG manual scope | PASS | WCAG_REVIEW_SCOPE.md | Complete human review for production claims. |

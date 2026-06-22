@@ -10,18 +10,18 @@ Updated: 2026-06-22
 
 | Candidate | Stars | Decision | Evidence | Boundary | Next action |
 |---|---:|---|---|---|---|
-| GitHub Actions/Pages/Issues/Projects | 5 | `ADOPT` | Actions proof, Pages preview, artifact evidence, project queue docs | Free/public repo limits and owner permissions still apply. | Use Issues/Projects for AI-OS candidate queue when the work list grows. |
-| Cloudflare Workers/KV/D1 | 5 | `PILOT` | `telemetry_worker_example.js`, `telemetry_config.js` | Endpoint is not live until deployed; privacy/retention approval required. | Pilot RUM/Web Vitals and ops event sink after endpoint decision. |
+| GitHub Actions/Pages/Issues/Projects | 5 | `ADOPT` | Actions proof, Pages preview, artifact evidence, `GITHUB_PROJECTS_QUEUE.md` | Free/public repo limits and owner permissions still apply. | Use `setup_github_projects_board.ps1` when the work list grows. |
+| Cloudflare Workers/KV/D1 | 5 | `PILOT` | `cloudflare/telemetry-worker.js`, `deploy_cloudflare_telemetry_worker.ps1`, `telemetry_config.js` | Endpoint is not live until deployed; privacy/retention approval required. | Pilot RUM/Web Vitals and ops event sink after endpoint decision. |
 | Playwright/Lighthouse/axe | 5 | `ADOPT` | `run_cmb_frontend_proof_stack.ps1`, QA reports, GitHub artifact | Local/CI proof is not real-user monitoring. | Keep extending business scenarios. |
-| Sentry Free | 4 | `PILOT` | `OBSERVABILITY_RUNTIME.md`, `ops_alert_rules.json` | Free quota, data retention, and third-party data boundary apply. | Pilot only after deciding what error data may leave the browser. |
-| Storybook | 4 | `PILOT` | `component-workshop.html`, `DESIGN_TOKENS.md`, `COMPONENT_INVENTORY.md` | Static workshop is not full Storybook. | Move to Storybook when components become reusable across projects. |
+| Sentry Free | 4 | `PILOT` | `SENTRY_FREE_OBSERVABILITY.md`, `sentry_config.js`, `sentry_browser_bridge.js` | Free quota, data retention, and third-party data boundary apply. | Pilot only after deciding what error data may leave the browser. |
+| Storybook | 4 | `PILOT` | `STORYBOOK_COMPONENT_WORKSHOP.md`, `.storybook/main.js`, `stories/cmb-components.stories.js` | Static workshop is not full Storybook. | Move to Storybook when components become reusable across projects. |
 | Supabase Free | 3 | `QUEUE` | CMB DB/backend discussions | Not needed while static/Sheets/free local path is enough. | Revisit when auth/DB/role workflows exceed current backend. |
 | Vercel/Netlify Free | 3 | `QUEUE` | GitHub Pages already operational | Extra deploy surface may add maintenance. | Revisit when preview environments need branch URLs or serverless functions. |
 | Random new AI/code tool | 1 | `REJECT` | No project fit yet | Hype and lock-in risk. | Reject unless it proves a 5-star repeated-toil reduction. |
 
 ## Integration Plan
 
-- Adopted now: GitHub proof stack and Playwright/Lighthouse/axe QA.
+- Adopted now: GitHub proof stack, GitHub Projects setup script, and Playwright/Lighthouse/axe QA.
 - Pilot next: Cloudflare Workers for RUM/ops endpoint, Sentry Free for alerting, Storybook for living components.
 - Queued: Supabase and Vercel/Netlify until the project outgrows the current free/static path.
 - Reject by default: tools that require secrets, broad repo access, paid plans, or unclear data retention without a strong project need.
