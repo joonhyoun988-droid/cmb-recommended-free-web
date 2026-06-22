@@ -13,6 +13,7 @@ Project: `C:\Users\joonh\Documents\Codex\CMB_RECOMMENDED_FREE_WEB`
 | Top 0.01 percent platform gap plan | PRESENT | `TOP_001_PERCENT_PLATFORM_GAP_PLAN.md` | v8.12 five platform gap lanes | Keep evidence fresh. |
 | Project migration queue | PRESENT | `PROJECT_MIGRATION_QUEUE.md` | v8.13 active project adoption queue | Keep evidence fresh. |
 | Generated platform cockpit | PRESENT | `GENERATED_PLATFORM_COCKPIT.md` | v8.13 generated evidence cockpit | Keep evidence fresh. |
+| Platform circulation loop | PRESENT | `PLATFORM_CIRCULATION_LOOP.md` | v8.14 criteria/adoption/evidence/operations/recovery/design loop | Keep evidence fresh. |
 
 ```text
 MIGRATION_COCKPIT_RECEIPT:
