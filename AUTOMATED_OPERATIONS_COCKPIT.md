@@ -14,6 +14,7 @@ Updated: 2026-06-22
 | `OBSERVABILITY_SIGNAL_LANE` | READY_LOCAL | `runtime_observability_client.js`, `OBSERVABILITY_RUNTIME.md` | Add logs/metrics/traces/alerts sink when production hosting exists. |
 | `REMOTE_PROOF_LANE` | PASS | `REMOTE_EVIDENCE_SNAPSHOT.json`, GitHub Actions run `27911725027`, artifact `7777556539`, Pages HTTP 200 | Refresh snapshot after release proof runs. |
 | `ONE_SCREEN_COCKPIT_LANE` | PASS | `PRODUCT_OPS_COCKPIT.md` + this cockpit | Promote to generated dashboard later. |
+| `TOP_001_PLATFORM_GAP_LANE` | READY_STAGED | `TOP_001_PERCENT_PLATFORM_GAP_PLAN.md` | Use this as the forced upgrade queue for migration bot, central RUM, live observability, living design system, and generated cockpit. |
 | `NO_OVERCLAIM_LANE` | PASS | `READY_LOCAL` and `NOT_YET` labels used | Do not call local-only data production monitoring. |
 
 ```text
