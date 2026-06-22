@@ -1,6 +1,6 @@
 # CMB Operations Telemetry Plan
 
-Status: ready_not_live
+Status: ready_endpoint_not_live
 
 ## Signals
 
@@ -21,4 +21,12 @@ Status: ready_not_live
 
 ## Activation Trigger
 
-Turn this from plan to live monitoring after CMB has a public preview or production deployment.
+Turn this from plan to live monitoring after CMB has a privacy-safe telemetry endpoint and an owner-approved retention policy.
+
+## Ready Files
+
+- `runtime_observability_client.js`: captures runtime events locally and can send to a configured endpoint.
+- `rum_web_vitals_client.js`: captures Web Vitals locally and can send to a configured endpoint.
+- `telemetry_config.js`: keeps endpoints blank by default so no data leaves the browser accidentally.
+- `ops_alert_rules.json`: defines first alert thresholds for LCP, CLS, error spikes, and repeated failures.
+- `telemetry_worker_example.js`: example sink for a Cloudflare Worker style endpoint.

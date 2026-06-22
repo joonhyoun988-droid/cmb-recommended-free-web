@@ -1,0 +1,56 @@
+{
+  "updatedAt": "2026-06-22T02:18:37Z",
+  "project": "CMB_RECOMMENDED_FREE_WEB",
+  "proofLevel": "preview_operational",
+  "summary": {
+    "overall": "READY_STAGED",
+    "localGit": "clean",
+    "remoteProof": "PASS",
+    "productionRum": "NOT_YET",
+    "liveObservability": "NOT_YET"
+  },
+  "lanes": [
+    {
+      "name": "PR draft bot",
+      "status": "SCRIPT_READY",
+      "evidence": "create_project_adoption_pr.ps1",
+      "next": "Run with -CreatePr when an adoption branch is needed."
+    },
+    {
+      "name": "Generated web cockpit",
+      "status": "READY",
+      "evidence": "platform-dashboard.html, platform-dashboard-data.json",
+      "next": "Refresh JSON after proof runs."
+    },
+    {
+      "name": "RUM/Web Vitals",
+      "status": "READY_LOCAL_PLUS_ENDPOINT_READY",
+      "evidence": "rum_web_vitals_client.js, telemetry_config.js",
+      "next": "Set a privacy-safe rum endpoint before production monitoring claims."
+    },
+    {
+      "name": "Logs/metrics/traces/alerts",
+      "status": "READY_LOCAL_PLUS_ENDPOINT_READY",
+      "evidence": "runtime_observability_client.js, ops_alert_rules.json",
+      "next": "Set a privacy-safe ops endpoint and alert sink."
+    },
+    {
+      "name": "Living design system",
+      "status": "WORKSHOP_READY",
+      "evidence": "component-workshop.html, DESIGN_TOKENS.md, COMPONENT_INVENTORY.md",
+      "next": "Promote repeated UI parts into component stories."
+    },
+    {
+      "name": "Required ruleset",
+      "status": "PARTIAL_ENV_BOUNDARY",
+      "evidence": "GitHub required check is active on CMB; AI-OS ruleset proof remains plan/visibility boundary.",
+      "next": "Keep local hooks and GitHub Actions green until plan/permissions allow stronger enforcement."
+    }
+  ],
+  "remote": {
+    "repo": "joonhyoun988-droid/cmb-recommended-free-web",
+    "proofRun": "https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27911725027",
+    "pages": "https://joonhyoun988-droid.github.io/cmb-recommended-free-web/",
+    "artifact": "cmb-frontend-proof-488354e174faf439f7056011149435a0f926d08b"
+  }
+}

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CMB Platform Dashboard</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #eef5f2;
+        --panel: #ffffff;
+        --ink: #0f1f1a;
+        --muted: #5a6d66;
+        --line: #c9d8d2;
+        --green: #0f7a5f;
+        --blue: #235f9f;
+        --amber: #a76712;
+        --red: #ad2f2f;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Arial, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+      }
+      main {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 32px 0;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: flex-start;
+        margin-bottom: 20px;
+      }
+      h1 { margin: 0 0 8px; font-size: 28px; }
+      p { margin: 0; color: var(--muted); }
+      .actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+      a, button {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px;
+        background: var(--panel);
+        color: var(--ink);
+        font-weight: 700;
+        text-decoration: none;
+      }
+      button { cursor: pointer; }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+      }
+      .card strong { display: block; margin-bottom: 8px; font-size: 18px; }
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        border-radius: 999px;
+        padding: 4px 10px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .ok { background: var(--green); }
+      .warn { background: var(--amber); }
+      .info { background: var(--blue); }
+      .bad { background: var(--red); }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      th, td {
+        border-bottom: 1px solid var(--line);
+        padding: 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th { background: #dceae5; font-size: 13px; }
+      td { font-size: 14px; }
+      section { margin-top: 16px; }
+      .small { font-size: 12px; color: var(--muted); }
+      @media (max-width: 760px) {
+        header { display: block; }
+        .actions { justify-content: flex-start; margin-top: 12px; }
+        .grid { grid-template-columns: 1fr; }
+        table { display: block; overflow-x: auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>CMB Platform Dashboard</h1>
+          <p>Generated web cockpit for proof, operations readiness, and next actions.</p>
+        </div>
+        <div class="actions">
+          <button type="button" id="refreshBtn">Refresh</button>
+          <a href="./index.html">App</a>
+          <a href="./component-workshop.html">Components</a>
+        </div>
+      </header>
+
+      <section class="grid" id="summaryGrid" aria-label="Summary"></section>
+      <section>
+        <table aria-label="Platform lanes">
+          <thead>
+            <tr>
+              <th>Lane</th>
+              <th>Status</th>
+              <th>Evidence</th>
+              <th>Next action</th>
+            </tr>
+          </thead>
+          <tbody id="laneRows"></tbody>
+        </table>
+      </section>
+      <section class="card">
+        <strong>Remote proof</strong>
+        <p id="remoteProof"></p>
+        <p class="small" id="updatedAt"></p>
+      </section>
+    </main>
+    <script>
+      function statusClass(status) {
+        if (/PASS|READY|SCRIPT_READY|WORKSHOP_READY/.test(status)) return "ok";
+        if (/NOT_YET|PARTIAL|NEXT|LOCAL/.test(status)) return "warn";
+        if (/FAIL|BLOCKED/.test(status)) return "bad";
+        return "info";
+      }
+
+      async function loadDashboard() {
+        const response = await fetch("./platform-dashboard-data.json", { cache: "no-store" });
+        const data = await response.json();
+        const summary = data.summary || {};
+        document.getElementById("summaryGrid").innerHTML = Object.keys(summary).map(function (key) {
+          const value = summary[key];
+          return `<article class="card"><strong>${key}</strong><span class="status ${statusClass(value)}">${value}</span></article>`;
+        }).join("");
+        document.getElementById("laneRows").innerHTML = (data.lanes || []).map(function (lane) {
+          return `<tr><td><strong>${lane.name}</strong></td><td><span class="status ${statusClass(lane.status)}">${lane.status}</span></td><td>${lane.evidence}</td><td>${lane.next}</td></tr>`;
+        }).join("");
+        const remote = data.remote || {};
+        document.getElementById("remoteProof").innerHTML = `${remote.repo || ""}<br><a href="${remote.proofRun || "#"}">${remote.proofRun || "no proof run"}</a><br><a href="${remote.pages || "#"}">${remote.pages || "no pages url"}</a>`;
+        document.getElementById("updatedAt").textContent = `Updated: ${data.updatedAt || "unknown"}`;
+      }
+
+      document.getElementById("refreshBtn").addEventListener("click", loadDashboard);
+      loadDashboard().catch(function (error) {
+        document.getElementById("summaryGrid").innerHTML = `<article class="card"><strong>Dashboard</strong><span class="status bad">LOAD_FAIL</span><p>${error.message}</p></article>`;
+      });
+      setInterval(loadDashboard, 30000);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "status": "local_rules_ready",
+  "rules": [
+    {
+      "id": "rum_lcp_warn",
+      "stream": "cmb_rum",
+      "condition": "LCP > 2500",
+      "severity": "warn",
+      "next": "Check large render blocks and image/layout shifts."
+    },
+    {
+      "id": "rum_cls_warn",
+      "stream": "cmb_rum",
+      "condition": "CLS > 0.1",
+      "severity": "warn",
+      "next": "Check layout shifts in inventory cards and panels."
+    },
+    {
+      "id": "ops_error_alert",
+      "stream": "cmb_ops",
+      "condition": "level == error",
+      "severity": "alert",
+      "next": "Open runtime_observability_client snapshot and latest console error."
+    }
+  ]
+}

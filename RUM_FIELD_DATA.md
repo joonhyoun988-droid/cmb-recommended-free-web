@@ -1,6 +1,6 @@
 # CMB RUM Field Data
 
-Status: `ready_local_not_centralized`
+Status: `ready_local_plus_endpoint_ready_not_centralized`
 
 World-class target:
 
@@ -13,8 +13,10 @@ Current CMB implementation:
 
 - `rum_web_vitals_client.js` measures LCP, CLS, INP candidates, and FID fallback.
 - Events are stored in browser `localStorage` under `cmb_rum_events_v1`.
-- No external network request is made.
-- This is real browser field collection on the current device, but not central production RUM.
+- `telemetry_config.js` can set `window.CMB_TELEMETRY_ENDPOINTS.rum`.
+- When the endpoint is blank, no external network request is made.
+- When the endpoint is set, events are sent best-effort with `sendBeacon` or `fetch`.
+- This is real browser field collection on the current device plus central-collection wiring, but not central production RUM until a privacy-safe endpoint is deployed and retained.
 
 Inspect in browser console:
 
@@ -31,4 +33,5 @@ window.CMBRUM.clear()
 No-overclaim:
 
 - Allowed: `rum_ready_local_collector`
+- Allowed: `rum_endpoint_ready_unconfigured`
 - Not allowed yet: `production_rum_monitoring`

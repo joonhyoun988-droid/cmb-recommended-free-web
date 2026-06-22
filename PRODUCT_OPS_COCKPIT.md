@@ -10,12 +10,15 @@ Updated: 2026-06-22
 | Preview deploy | PASS | `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27911356885` | Keep Pages HTTP 200. |
 | Public URL | PASS | `https://joonhyoun988-droid.github.io/cmb-recommended-free-web/` | Add deeper route checks as scope grows. |
 | Artifact retention | PASS | `cmb-frontend-proof-488354e174faf439f7056011149435a0f926d08b`; artifact `7777556539` | Move durable proof to vault if needed. |
-| RUM/Web Vitals | READY_LOCAL | `rum_web_vitals_client.js`, `RUM_FIELD_DATA.md` | Add remote endpoint before production claims. |
-| Observability | READY_LOCAL | `runtime_observability_client.js`, `OBSERVABILITY_RUNTIME.md` | Add server-side log/alert sink later. |
+| RUM/Web Vitals | READY_LOCAL_PLUS_ENDPOINT_READY | `rum_web_vitals_client.js`, `telemetry_config.js`, `RUM_FIELD_DATA.md` | Configure a privacy-safe endpoint before production RUM claims. |
+| Observability | READY_LOCAL_PLUS_ENDPOINT_READY | `runtime_observability_client.js`, `ops_alert_rules.json`, `telemetry_worker_example.js` | Deploy an ops endpoint and alert sink before live alerting claims. |
 | Design rework loop | READY | `DESIGN_REWORK_LOOP.md`, `DESIGN_QUALITY_SCORECARD.md` | Re-score after visible redesigns. |
-| AI-OS dashboard | READY | v8.08/v8.11 gates + this cockpit + `AUTOMATED_OPERATIONS_COCKPIT.md` | Promote to one-screen generated dashboard later. |
+| AI-OS dashboard | READY_STATIC_WEB | `platform-dashboard.html`, `platform-dashboard-data.json`, this cockpit | Refresh dashboard JSON after proof runs. |
+| Living component workshop | READY | `component-workshop.html`, `DESIGN_TOKENS.md`, `COMPONENT_INVENTORY.md` | Use before UI redesigns and after new components appear. |
+| PR draft bot | SCRIPT_READY | `create_project_adoption_pr.ps1` | Run `-DryRun`; use real PR only after clean worktree/auth checks. |
 | Project criteria adoption | PASS | `EFFICIENCY_GOVERNOR.md`, `RESPONSIVE_PREVIEW_QA.md`, `AUTOMATED_OPERATIONS_COCKPIT.md` | Keep active project docs updated when AI-OS adds relevant gates. |
-| Production RUM monitoring | NOT_YET | no central field collection | Do not overclaim production monitoring. |
+| Production RUM monitoring | NOT_YET | endpoint hook exists, central endpoint not deployed | Do not overclaim production monitoring. |
+| Live ops alerting | NOT_YET | alert rules exist, alert sink not deployed | Do not overclaim live alerting. |
 
 ## Commands
 

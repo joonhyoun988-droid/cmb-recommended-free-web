@@ -21,15 +21,49 @@
   }
 
   function record(level, name, detail) {
-    var events = readEvents();
-    events.push({
+    var event = {
       level: level,
       name: name,
       detail: detail || {},
       path: location.pathname,
       at: new Date().toISOString()
-    });
+    };
+    var events = readEvents();
+    events.push(event);
     writeEvents(events);
+    sendEvent(event);
+  }
+
+  function endpoint() {
+    var endpoints = window.CMB_TELEMETRY_ENDPOINTS || {};
+    return typeof endpoints.ops === "string" ? endpoints.ops.trim() : "";
+  }
+
+  function sendEvent(event) {
+    var url = endpoint();
+    if (!url) return;
+    var payload = JSON.stringify({
+      stream: "cmb_ops",
+      version: 1,
+      event: event
+    });
+    try {
+      if (navigator.sendBeacon) {
+        var blob = new Blob([payload], { type: "application/json" });
+        if (navigator.sendBeacon(url, blob)) return;
+      }
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+        keepalive: true,
+        mode: "cors"
+      }).catch(function () {
+        // Remote observability must never interrupt field work.
+      });
+    } catch (error) {
+      // Remote observability is optional and best-effort.
+    }
   }
 
   window.addEventListener("error", function (event) {
@@ -68,6 +102,7 @@
     snapshot: function () {
       return {
         key: KEY,
+        endpointConfigured: Boolean(endpoint()),
         events: readEvents()
       };
     },

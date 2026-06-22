@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CMB Component Workshop</title>
+    <link rel="stylesheet" href="./styles.css">
+    <style>
+      body { background: #eef5f2; color: #10201b; }
+      main { width: min(1160px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0; }
+      header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 18px; }
+      h1 { margin: 0 0 8px; font-size: 28px; }
+      .workshop-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      .story { background: #fff; border: 1px solid #cadbd4; border-radius: 8px; padding: 16px; }
+      .story h2 { margin: 0 0 12px; font-size: 18px; }
+      .story-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+      .swatch { width: 72px; height: 54px; border-radius: 8px; border: 1px solid #c8d8d2; display: grid; place-items: end start; padding: 8px; color: #fff; font-size: 11px; font-weight: 700; }
+      .sample-card { border: 1px solid #d2ded9; border-radius: 8px; padding: 14px; min-width: 180px; background: #f8fbfa; }
+      .state-table { width: 100%; border-collapse: collapse; }
+      .state-table th, .state-table td { border-bottom: 1px solid #d8e4df; padding: 10px; text-align: left; }
+      @media (max-width: 800px) {
+        header { display: block; }
+        .workshop-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">Living Design System</p>
+          <h1>CMB Component Workshop</h1>
+          <p>Reusable component states for app, dashboard, and mobile workflows.</p>
+        </div>
+        <div class="story-row">
+          <a class="secondary-btn" href="./index.html">App</a>
+          <a class="secondary-btn" href="./platform-dashboard.html">Dashboard</a>
+        </div>
+      </header>
+
+      <section class="workshop-grid">
+        <article class="story">
+          <h2>Design Tokens</h2>
+          <div class="story-row">
+            <div class="swatch" style="background:#0f7a5f">green</div>
+            <div class="swatch" style="background:#12332b">ink</div>
+            <div class="swatch" style="background:#235f9f">blue</div>
+            <div class="swatch" style="background:#a76712">amber</div>
+          </div>
+        </article>
+        <article class="story">
+          <h2>Buttons</h2>
+          <div class="story-row">
+            <button class="primary-btn">Save</button>
+            <button class="secondary-btn">Review</button>
+            <button class="ghost-btn">Cancel</button>
+            <button class="primary-btn" disabled>Loading</button>
+          </div>
+        </article>
+        <article class="story">
+          <h2>Inventory card</h2>
+          <div class="story-row">
+            <div class="sample-card">
+              <p class="eyebrow">00027</p>
+              <strong>Greenmedi / 20L</strong>
+              <p>Current 906 / Count 900</p>
+              <span class="badge is-green">Matched</span>
+            </div>
+            <div class="sample-card">
+              <p class="eyebrow">00006</p>
+              <strong>Greenmedi / 4L</strong>
+              <p>Current 4 / Count 3</p>
+              <span class="badge is-amber">Diff</span>
+            </div>
+          </div>
+        </article>
+        <article class="story">
+          <h2>Form states</h2>
+          <label class="stacked-label">
+            <span>Quantity</span>
+            <input value="12">
+          </label>
+          <label class="stacked-label">
+            <span>Invalid quantity</span>
+            <input aria-invalid="true" value="-1">
+          </label>
+        </article>
+        <article class="story">
+          <h2>Status matrix</h2>
+          <table class="state-table">
+            <thead><tr><th>State</th><th>Use</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge is-green">PASS</span></td><td>Proof or count is confirmed.</td></tr>
+              <tr><td><span class="badge is-blue">READY_LOCAL</span></td><td>Local proof exists, production proof does not.</td></tr>
+              <tr><td><span class="badge is-amber">NEXT</span></td><td>Known next step, not a failure.</td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="story">
+          <h2>Accessibility rules</h2>
+          <ul>
+            <li>Buttons keep visible focus states.</li>
+            <li>Status labels include text, not color alone.</li>
+            <li>Mobile cards stay one-column under narrow widths.</li>
+          </ul>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

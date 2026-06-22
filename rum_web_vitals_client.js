@@ -31,16 +31,50 @@
   }
 
   function record(type, value, detail) {
-    var events = readEvents();
-    events.push({
+    var event = {
       type: type,
       value: value,
       detail: detail || {},
       path: location.pathname,
       visibility: document.visibilityState,
       at: nowIso()
-    });
+    };
+    var events = readEvents();
+    events.push(event);
     writeEvents(events);
+    sendEvent(event);
+  }
+
+  function endpoint() {
+    var endpoints = window.CMB_TELEMETRY_ENDPOINTS || {};
+    return typeof endpoints.rum === "string" ? endpoints.rum.trim() : "";
+  }
+
+  function sendEvent(event) {
+    var url = endpoint();
+    if (!url) return;
+    var payload = JSON.stringify({
+      stream: "cmb_rum",
+      version: 1,
+      event: event
+    });
+    try {
+      if (navigator.sendBeacon) {
+        var blob = new Blob([payload], { type: "application/json" });
+        if (navigator.sendBeacon(url, blob)) return;
+      }
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+        keepalive: true,
+        mode: "cors"
+      }).catch(function () {
+        // Remote telemetry must never interrupt field work.
+      });
+    } catch (error) {
+      // Remote telemetry is optional and best-effort.
+    }
   }
 
   function observe(type, handler, options) {
@@ -94,6 +128,7 @@
     snapshot: function () {
       return {
         key: KEY,
+        endpointConfigured: Boolean(endpoint()),
         vitals: Object.assign({}, vitals),
         events: readEvents()
       };
