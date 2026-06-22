@@ -31,6 +31,7 @@ $commands = @(
   "powershell -ExecutionPolicy Bypass -File $AiOsRoot\_tools\run_platform_circulation_loop_gate_v8_14.ps1 -Root $AiOsRoot -ProjectPath $ProjectPath -NoReport",
   "powershell -ExecutionPolicy Bypass -File $AiOsRoot\_tools\run_upgrade_demand_governor_gate_v8_15.ps1 -Root $AiOsRoot -ProjectPath $ProjectPath -NoReport",
   "powershell -ExecutionPolicy Bypass -File $AiOsRoot\_tools\run_platform_gap_execution_closure_gate_v8_16.ps1 -Root $AiOsRoot -ProjectPath $ProjectPath -NoReport",
+  "powershell -ExecutionPolicy Bypass -File $AiOsRoot\_tools\run_world_class_free_toolchain_radar_gate_v8_17.ps1 -Root $AiOsRoot -ProjectPath $ProjectPath -NoReport",
   "git add --all",
   "git commit -m `"Adopt AI-OS project criteria`"",
   "git push -u origin $BranchName",
@@ -52,6 +53,7 @@ if ($LASTEXITCODE -eq 0) {
 & powershell -ExecutionPolicy Bypass -File (Join-Path $AiOsRoot "_tools\run_platform_circulation_loop_gate_v8_14.ps1") -Root $AiOsRoot -ProjectPath $ProjectPath -NoReport
 & powershell -ExecutionPolicy Bypass -File (Join-Path $AiOsRoot "_tools\run_upgrade_demand_governor_gate_v8_15.ps1") -Root $AiOsRoot -ProjectPath $ProjectPath -NoReport
 & powershell -ExecutionPolicy Bypass -File (Join-Path $AiOsRoot "_tools\run_platform_gap_execution_closure_gate_v8_16.ps1") -Root $AiOsRoot -ProjectPath $ProjectPath -NoReport
+& powershell -ExecutionPolicy Bypass -File (Join-Path $AiOsRoot "_tools\run_world_class_free_toolchain_radar_gate_v8_17.ps1") -Root $AiOsRoot -ProjectPath $ProjectPath -NoReport
 Run-Git @("add", "--all")
 $changed = & git -C $ProjectPath status --short
 if (-not $changed) {

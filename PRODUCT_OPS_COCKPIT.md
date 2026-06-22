@@ -16,6 +16,7 @@ Updated: 2026-06-22
 | AI-OS dashboard | READY_STATIC_WEB | `platform-dashboard.html`, `platform-dashboard-data.json`, this cockpit | Refresh dashboard JSON after proof runs. |
 | Living component workshop | READY | `component-workshop.html`, `DESIGN_TOKENS.md`, `COMPONENT_INVENTORY.md` | Use before UI redesigns and after new components appear. |
 | PR draft bot | SCRIPT_READY | `create_project_adoption_pr.ps1` | Run `-DryRun`; use real PR only after clean worktree/auth checks. |
+| Free toolchain radar | RADAR_ADOPTED | `WORLD_CLASS_FREE_TOOLCHAIN_RADAR.md` | Use GitHub/Cloudflare/Sentry/Storybook/Playwright score before integration. |
 | Project criteria adoption | PASS | `EFFICIENCY_GOVERNOR.md`, `RESPONSIVE_PREVIEW_QA.md`, `AUTOMATED_OPERATIONS_COCKPIT.md` | Keep active project docs updated when AI-OS adds relevant gates. |
 | Production RUM monitoring | NOT_YET | endpoint hook exists, central endpoint not deployed | Do not overclaim production monitoring. |
 | Live ops alerting | NOT_YET | alert rules exist, alert sink not deployed | Do not overclaim live alerting. |

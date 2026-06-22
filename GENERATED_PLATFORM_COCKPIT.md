@@ -8,7 +8,7 @@ Project: `C:\Users\joonh\Documents\Codex\CMB_RECOMMENDED_FREE_WEB`
 | Lane | Status | Evidence | Next action |
 |---|---|---|---|
 | Worktree | source_clean | `git status --short` | Keep clean before delivery. |
-| Project migration queue | PASS | active=9, missing=0, `PROJECT_MIGRATION_QUEUE.md` | Keep new platform closure files tracked. |
+| Project migration queue | PASS | active=10, missing=0, `PROJECT_MIGRATION_QUEUE.md` | Keep new platform closure files tracked. |
 | PR draft bot | SCRIPT_READY | `create_project_adoption_pr.ps1` | Use `-DryRun` first; use `-CreatePr` only after auth/worktree checks. |
 | Remote proof | PASS | success / https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27927359323 / cmb-frontend-proof-eafbe2ed943cc50d534953cc800ef335fc955d22 | Refresh after every release proof run. |
 | Preview URL | PASS | https://joonhyoun988-droid.github.io/cmb-recommended-free-web/ | Keep HTTP 200 proof fresh. |
@@ -18,6 +18,7 @@ Project: `C:\Users\joonh\Documents\Codex\CMB_RECOMMENDED_FREE_WEB`
 | Living design system | WORKSHOP_READY | `component-workshop.html`, tokens, component/design proof | Use the workshop before visible UI redesign work. |
 | Platform circulation | DOCUMENTED_LOOP | `PLATFORM_CIRCULATION_LOOP.md` | Keep criteria, adoption, evidence, operations, recovery, and design judgment circulating. |
 | Upgrade demand | ADOPTED | `UPGRADE_DEMAND_GOVERNOR.md` | Batch non-urgent ideas and protect project delivery focus. |
+| Free toolchain radar | RADAR_ADOPTED | `WORLD_CLASS_FREE_TOOLCHAIN_RADAR.md` | Use Adopt/Pilot/Queue/Reject before connecting free external gears. |
 | No-overclaim | PASS | READY_LOCAL / NEXT / NOT_YET / preview_operational | Do not call this production platform parity yet. |
 
 ## Next Forced Action
@@ -25,3 +26,4 @@ Project: `C:\Users\joonh\Documents\Codex\CMB_RECOMMENDED_FREE_WEB`
 1. Run `.\create_project_adoption_pr.ps1 -DryRun` before opening adoption branches.
 2. Open `platform-dashboard.html` after platform changes and refresh `platform-dashboard-data.json` after proof runs.
 3. Deploy a privacy-safe telemetry endpoint before claiming central RUM or live alerting.
+4. Pilot Cloudflare/Sentry/Storybook only after the radar keeps their boundary visible.
