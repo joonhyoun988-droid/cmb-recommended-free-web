@@ -12,7 +12,7 @@ Updated: 2026-06-22
 | `PROJECT_ADOPTION_LANE` | PASS | `EFFICIENCY_GOVERNOR.md`, `RESPONSIVE_PREVIEW_QA.md`, this file | Keep new OS criteria copied/adapted when they affect active projects. |
 | `RUM_FIELD_DATA_LANE` | READY_LOCAL_PLUS_ENDPOINT_READY | `rum_web_vitals_client.js`, `telemetry_config.js`, `RUM_FIELD_DATA.md` | Deploy remote field collection before production RUM claims. |
 | `OBSERVABILITY_SIGNAL_LANE` | READY_LOCAL_PLUS_ENDPOINT_READY | `runtime_observability_client.js`, `ops_alert_rules.json`, `telemetry_worker_example.js` | Deploy logs/metrics/traces/alerts sink when production monitoring is needed. |
-| `REMOTE_PROOF_LANE` | PASS | `REMOTE_EVIDENCE_SNAPSHOT.json`, GitHub Actions run `27911725027`, artifact `7777556539`, Pages HTTP 200 | Refresh snapshot after release proof runs. |
+| `REMOTE_PROOF_LANE` | PASS | `REMOTE_EVIDENCE_SNAPSHOT.json`, GitHub Actions run `27927359323`, artifact `7782537320`, Pages HTTP 200 | Refresh snapshot after release proof runs. |
 | `ONE_SCREEN_COCKPIT_LANE` | PASS | `PRODUCT_OPS_COCKPIT.md` + `platform-dashboard.html` + this cockpit | Keep generated dashboard data fresh. |
 | `TOP_001_PLATFORM_GAP_LANE` | EXECUTION_STAGED | `TOP_001_PERCENT_PLATFORM_GAP_PLAN.md`, `PLATFORM_GAP_EXECUTION_CLOSURE.md` | Remaining true boundary is deployed telemetry and stronger GitHub ruleset proof. |
 | `NO_OVERCLAIM_LANE` | PASS | `READY_LOCAL` and `NOT_YET` labels used | Do not call local-only data production monitoring. |

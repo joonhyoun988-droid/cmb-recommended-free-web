@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-22T02:18:37Z",
+  "updatedAt": "2026-06-22T03:21:52Z",
   "project": "CMB_RECOMMENDED_FREE_WEB",
   "proofLevel": "preview_operational",
   "summary": {
@@ -49,8 +49,8 @@
   ],
   "remote": {
     "repo": "joonhyoun988-droid/cmb-recommended-free-web",
-    "proofRun": "https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27911725027",
+    "proofRun": "https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27927359323",
     "pages": "https://joonhyoun988-droid.github.io/cmb-recommended-free-web/",
-    "artifact": "cmb-frontend-proof-488354e174faf439f7056011149435a0f926d08b"
+    "artifact": "cmb-frontend-proof-eafbe2ed943cc50d534953cc800ef335fc955d22"
   }
 }

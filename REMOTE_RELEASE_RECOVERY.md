@@ -51,14 +51,14 @@ mindmap
 
 ## Latest Evidence
 
-- App/workflow proof SHA: `bb5bb181a7d6d5e2ffd21bf5a817f27c9ec054fd`
-- Frontend proof run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27911624373`
-- Pages deploy run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27911356885`
+- App/workflow proof SHA: `eafbe2ed943cc50d534953cc800ef335fc955d22`
+- Frontend proof run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27927359323`
+- Pages deploy run: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27927359316`
 - Pages URL: `https://joonhyoun988-droid.github.io/cmb-recommended-free-web/`
 - Pages HTTP status: `200`
 - Required check: branch protection requires always-on `frontend-proof`
-- Artifact: `cmb-frontend-proof-bb5bb181a7d6d5e2ffd21bf5a817f27c9ec054fd`
-- Artifact API: `https://api.github.com/repos/joonhyoun988-droid/cmb-recommended-free-web/actions/artifacts/7777527878`
+- Artifact: `cmb-frontend-proof-eafbe2ed943cc50d534953cc800ef335fc955d22`
+- Artifact API: `https://api.github.com/repos/joonhyoun988-droid/cmb-recommended-free-web/actions/artifacts/7782537320`
 
 ## Remaining Gaps
 
