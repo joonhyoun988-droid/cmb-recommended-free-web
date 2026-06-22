@@ -15,6 +15,7 @@ Project: `C:\Users\joonh\Documents\Codex\CMB_RECOMMENDED_FREE_WEB`
 | Observability | READY_LOCAL | runtime client, observability doc, telemetry plan | Add logs/metrics/traces/alerts sink for live operations. |
 | Living design system | NOW_DOC | tokens=True, component/design proof | Promote key components into reusable state/spec stories. |
 | Platform circulation | DOCUMENTED_LOOP | `PLATFORM_CIRCULATION_LOOP.md` | Keep criteria, adoption, evidence, operations, recovery, and design judgment circulating. |
+| Upgrade demand | ADOPTED | `UPGRADE_DEMAND_GOVERNOR.md` | Batch non-urgent ideas and protect project delivery focus. |
 | No-overclaim | PASS | READY_LOCAL / NEXT / NOT_YET / preview_operational | Do not call this production platform parity yet. |
 
 ## Next Forced Action

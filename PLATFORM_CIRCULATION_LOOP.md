@@ -15,6 +15,7 @@ Updated: 2026-06-22
 | `RECOVERY_LANE` | PASS | `REMOTE_RELEASE_RECOVERY.md`, `GITHUB_AUTH_LIFECYCLE.md`, required-check recovery notes | Keep stale-proof repair and rollback route visible. |
 | `DESIGN_JUDGMENT_LANE` | NOW_DOC | `DESIGN_TOKENS.md`, `COMPONENT_INVENTORY.md`, `DESIGN_QUALITY_SCORECARD.md`, `VISUAL_DIFF_QA_REPORT.md`, `ACCESSIBILITY_AUDIT_REPORT.md` | NEXT: reusable component state/story layer. |
 | `FEEDBACK_TO_CRITERIA_LANE` | PASS | AI-OS v8.14 eval cases and Wisdom Delta route | Promote repeated misses to lesson, eval case, candidate, durable rule, or retire/merge decision. |
+| `UPGRADE_DEMAND_LANE` | PASS | `UPGRADE_DEMAND_GOVERNOR.md` | Triage upgrade pressure before adding more permanent criteria. |
 | `NO_OVERCLAIM_LANE` | PASS | `READY_LOCAL`, `NEXT`, `NOT_YET`, `preview_operational` labels | Do not call this production platform parity yet. |
 
 ```text
