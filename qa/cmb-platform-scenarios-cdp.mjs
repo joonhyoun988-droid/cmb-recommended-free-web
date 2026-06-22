@@ -85,12 +85,13 @@ async function runScenario(client) {
       return {
         title: document.title,
         hasRadar: text.includes("Free toolchain radar"),
+        hasSchemaFirst: text.includes("Schema-first guidance"),
         hasRequiredRuleset: text.includes("Required ruleset"),
         hasComponentLink: Boolean(document.querySelector('a[href="./component-workshop.html"]'))
       };
     })()
   `);
-  if (!dashboard.hasRadar || !dashboard.hasRequiredRuleset || !dashboard.hasComponentLink) {
+  if (!dashboard.hasRadar || !dashboard.hasSchemaFirst || !dashboard.hasRequiredRuleset || !dashboard.hasComponentLink) {
     throw new Error("Platform dashboard scenario failed");
   }
 
@@ -156,7 +157,7 @@ try {
   ws.close();
   console.log(JSON.stringify({
     status: "PASS",
-    passedScenarios: 3,
+    passedScenarios: 4,
     failedScenarios: 0,
     checkedAt: new Date().toISOString(),
     scenario

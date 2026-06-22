@@ -22,6 +22,7 @@ Updated: 2026-06-22
 | Sentry Free | PILOT_READY_DSN_EMPTY | `sentry_config.js`, `SENTRY_FREE_OBSERVABILITY.md` | DSN empty by default; no external error data leaves yet. |
 | Storybook | PILOT_READY_NOT_INSTALLED | `.storybook/main.js`, `stories/cmb-components.stories.js` | Static workshop remains live until Storybook install. |
 | Extended Playwright scenarios | ADOPTED | `qa/cmb-platform-scenarios-cdp.mjs`, platform scenario reports | Dashboard/workshop/telemetry defaults now covered. |
+| Schema-first guidance | ADOPTED | `SCHEMA_FIRST_GUIDANCE.md`, `GITHUB_PROJECTS_QUEUE.md` | Separate fixed Lane from variable Project before external board setup. |
 | Project criteria adoption | PASS | `EFFICIENCY_GOVERNOR.md`, `RESPONSIVE_PREVIEW_QA.md`, `AUTOMATED_OPERATIONS_COCKPIT.md` | Keep active project docs updated when AI-OS adds relevant gates. |
 | Production RUM monitoring | NOT_YET | endpoint hook exists, central endpoint not deployed | Do not overclaim production monitoring. |
 | Live ops alerting | NOT_YET | alert rules exist, alert sink not deployed | Do not overclaim live alerting. |

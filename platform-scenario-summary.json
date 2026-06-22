@@ -1,8 +1,8 @@
 ﻿{
     "status":  "PASS",
-    "checkedAt":  "2026-06-22 14:05:12 +09:00",
+    "checkedAt":  "2026-06-22 15:29:52 +09:00",
     "exitCode":  0,
-    "passedScenarios":  3,
+    "passedScenarios":  4,
     "failedScenarios":  0,
     "rawReport":  "platform-scenario-report.json",
     "runner":  "Chrome DevTools Protocol"

@@ -24,6 +24,7 @@ Project: `C:\Users\joonh\Documents\Codex\CMB_RECOMMENDED_FREE_WEB`
 | Sentry Free pilot | PILOT_READY_DSN_EMPTY | `sentry_config.js`, `sentry_browser_bridge.js` | Set DSN only after owner-approved data boundary. |
 | Storybook pilot | PILOT_READY_NOT_INSTALLED | `.storybook/main.js`, `stories/cmb-components.stories.js` | Install when reusable components exceed static workshop. |
 | Extended Playwright scenarios | ADOPTED | `qa/cmb-platform-scenarios-cdp.mjs` | Keep dashboard/workshop/telemetry scenario proof in CI. |
+| Schema-first guidance | ADOPTED | `SCHEMA_FIRST_GUIDANCE.md`, `GITHUB_PROJECTS_QUEUE.md` | Keep fixed Lane separate from variable Project before board/DB/sheet setup. |
 | No-overclaim | PASS | READY_LOCAL / NEXT / NOT_YET / preview_operational | Do not call this production platform parity yet. |
 
 ## Next Forced Action
@@ -32,3 +33,4 @@ Project: `C:\Users\joonh\Documents\Codex\CMB_RECOMMENDED_FREE_WEB`
 2. Open `platform-dashboard.html` after platform changes and refresh `platform-dashboard-data.json` after proof runs.
 3. Deploy a privacy-safe telemetry endpoint before claiming central RUM or live alerting.
 4. Pilot Cloudflare/Sentry/Storybook only after the radar keeps their boundary visible.
+5. Run schema-first field review before adding external board fields by hand.

@@ -77,6 +77,12 @@
       "next": "Keep dashboard, component workshop, and telemetry default proof in CI."
     },
     {
+      "name": "Schema-first guidance",
+      "status": "ADOPTED",
+      "evidence": "SCHEMA_FIRST_GUIDANCE.md, GITHUB_PROJECTS_QUEUE.md",
+      "next": "Keep Lane as fixed operating core and put project names in Project."
+    },
+    {
       "name": "Required ruleset",
       "status": "PARTIAL_ENV_BOUNDARY",
       "evidence": "GitHub required check is active on CMB; AI-OS ruleset proof remains plan/visibility boundary.",

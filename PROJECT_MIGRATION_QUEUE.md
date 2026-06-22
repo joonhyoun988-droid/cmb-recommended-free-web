@@ -24,16 +24,17 @@ Project: `C:\Users\joonh\Documents\Codex\CMB_RECOMMENDED_FREE_WEB`
 | Sentry Free pilot | PRESENT | `sentry_config.js`, `SENTRY_FREE_OBSERVABILITY.md` | alerting bridge with empty DSN | Set DSN only after data boundary approval. |
 | Storybook pilot | PRESENT | `.storybook/main.js`, `stories/cmb-components.stories.js` | living component workshop path | Install when component reuse justifies it. |
 | Extended Playwright scenarios | PRESENT | `qa/cmb-platform-scenarios-cdp.mjs`, `PLAYWRIGHT_SCENARIO_EXPANSION.md` | more real browser proof | Keep in local and CI proof stack. |
+| Schema-first beginner guidance | PRESENT | `SCHEMA_FIRST_GUIDANCE.md`, `GITHUB_PROJECTS_QUEUE.md` | v8.19 fixed axis / variable project split | Keep Lane stable and project names in Project. |
 
 ```text
 MIGRATION_COCKPIT_RECEIPT:
 - project_path: C:\Users\joonh\Documents\Codex\CMB_RECOMMENDED_FREE_WEB
-- active_criteria_count: 15
+- active_criteria_count: 18
 - missing_criteria_count: 0
 - migration_queue_path: PROJECT_MIGRATION_QUEUE.md
 - generated_cockpit_path: GENERATED_PLATFORM_COCKPIT.md
 - evidence_sources: Git status, REMOTE_EVIDENCE_SNAPSHOT.json, RUM, observability, design proof
 - no_overclaim_labels: READY_LOCAL / NEXT / NOT_YET / preview_operational
-- next_automation: dry-run PR draft bot; generated cockpit refresh after proof runs; central telemetry endpoint deployment; free toolchain pilot decisions
+- next_automation: dry-run PR draft bot; generated cockpit refresh after proof runs; central telemetry endpoint deployment; free toolchain pilot decisions; schema-first field review before external board setup
 - blocked_by: production endpoint/retention decision, not local implementation
 ```
