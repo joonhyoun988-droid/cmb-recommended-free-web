@@ -8,6 +8,9 @@ on:
       - "index.html"
       - "styles.css"
       - "app.js"
+      - "platform-dashboard.html"
+      - "platform-dashboard-data.json"
+      - "component-workshop.html"
       - "rum_web_vitals_client.js"
       - "runtime_observability_client.js"
       - ".github/workflows/cmb-pages.yml"
@@ -35,6 +38,9 @@ jobs:
           cp index.html _site/index.html
           cp styles.css _site/styles.css
           cp app.js _site/app.js
+          cp platform-dashboard.html _site/platform-dashboard.html
+          cp platform-dashboard-data.json _site/platform-dashboard-data.json
+          cp component-workshop.html _site/component-workshop.html
           cp rum_web_vitals_client.js _site/rum_web_vitals_client.js
           cp runtime_observability_client.js _site/runtime_observability_client.js
           printf '{"proofLevel":"preview_operational_candidate","source":"github-pages"}\n' > _site/version.json
