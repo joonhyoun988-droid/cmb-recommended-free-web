@@ -1,15 +1,16 @@
 # CMB Product Ops Cockpit
 
-Status: `preview_operational`
-Updated: 2026-06-22
+Status: `remote_ci_and_pages_proven`
+Updated: 2026-06-28
 
 | Lane | Status | Evidence | Next action |
 |---|---|---|---|
 | Required checks | PASS | branch protection requires always-on `frontend-proof`; conversation resolution enabled | Keep `enforce_admins=false` unless owner wants strict PR-only lock. |
-| Remote CI | PASS | `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27927359323` | Keep latest app/workflow SHA green. |
-| Preview deploy | PASS | `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/27927359316` | Keep Pages HTTP 200. |
+| Remote CI | PASS | `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/28292899679`, job `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/28292899679/job/83827822387` | Keep latest app/workflow SHA green. |
+| Preview deploy | PASS | `https://github.com/joonhyoun988-droid/cmb-recommended-free-web/actions/runs/28292899657` | Keep Pages HTTP 200. |
 | Public URL | PASS | `https://joonhyoun988-droid.github.io/cmb-recommended-free-web/` | Add deeper route checks as scope grows. |
-| Artifact retention | PASS | `cmb-frontend-proof-eafbe2ed943cc50d534953cc800ef335fc955d22`; artifact `7782537320` | Move durable proof to vault if needed. |
+| Artifact retention | PASS | `cmb-frontend-proof-884910fc192fbd75a191afe286e4197d51943d6c`; artifact `7925568876`; digest `sha256:bedb2fa71a8680d5b5054166142e0dd982c5bdfeafc0ea669a1a639272f596b0`; expires `2026-07-27T15:05:56Z` | Move durable proof to vault if needed. |
+| AI-OS guardrails | PASS | `https://github.com/joonhyoun988-droid/ai-os-primary/actions/runs/28292911159`; artifact `7925564489`; digest `sha256:3646f8dbb06f59305ffa8eed213a1a1716fc805ee3ee01dcd39e6d9f303cbced` | Keep project queue and OS queue synchronized. |
 | RUM/Web Vitals | READY_LOCAL_PLUS_ENDPOINT_READY | `rum_web_vitals_client.js`, `telemetry_config.js`, `RUM_FIELD_DATA.md` | Configure a privacy-safe endpoint before production RUM claims. |
 | Observability | READY_LOCAL_PLUS_ENDPOINT_READY | `runtime_observability_client.js`, `ops_alert_rules.json`, `telemetry_worker_example.js` | Deploy an ops endpoint and alert sink before live alerting claims. |
 | Design rework loop | READY | `DESIGN_REWORK_LOOP.md`, `DESIGN_QUALITY_SCORECARD.md` | Re-score after visible redesigns. |
@@ -26,6 +27,7 @@ Updated: 2026-06-22
 | Project criteria adoption | PASS | `EFFICIENCY_GOVERNOR.md`, `RESPONSIVE_PREVIEW_QA.md`, `AUTOMATED_OPERATIONS_COCKPIT.md` | Keep active project docs updated when AI-OS adds relevant gates. |
 | Production RUM monitoring | NOT_YET | endpoint hook exists, central endpoint not deployed | Do not overclaim production monitoring. |
 | Live ops alerting | NOT_YET | alert rules exist, alert sink not deployed | Do not overclaim live alerting. |
+| Apps Script server-runtime auth probe | NOT_YET | server-code auth path inspected, live rejection probe intentionally not sent | Use staging or approved no-mutation rejection probe before T4 server-runtime auth claim. |
 
 ## Commands
 

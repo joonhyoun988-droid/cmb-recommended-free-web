@@ -2,7 +2,7 @@
   "status": "PASS",
   "passedScenarios": 4,
   "failedScenarios": 0,
-  "checkedAt": "2026-06-27T14:33:24.968Z",
+  "checkedAt": "2026-06-27T15:16:58.260Z",
   "scenario": {
     "dashboard": {
       "title": "CMB Platform Dashboard",
