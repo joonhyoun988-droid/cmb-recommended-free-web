@@ -102,11 +102,55 @@ async function runScenario(client) {
       click('[data-save="00027"]');
       await wait(450);
 
-      const auditText = q("#auditList")?.textContent || "";
+      let auditText = q("#auditList")?.textContent || "";
       const auditCount = q("#auditCount")?.textContent || "";
       const latencyText = q("#kpiLatency")?.textContent || "";
       if (!auditText.includes("00027")) throw new Error("Audit log does not include item 00027");
       if (/^0/.test(auditCount)) throw new Error("Audit count did not change");
+
+      setValue("#quickCommandInput", "그린자임 4리터 2개 생산");
+      click("#quickCommandForm button[type='submit']");
+      await wait(200);
+      const previewText = q("#quickCommandPreview")?.textContent || "";
+      if (!previewText.includes("00006") || !previewText.includes("생산 입고")) {
+        throw new Error("Quick command preview did not resolve Greenzyme 4L production");
+      }
+      click("#quickCommandApplyBtn");
+      await wait(350);
+      auditText = q("#auditList")?.textContent || "";
+      if (!auditText.includes("00006") || !auditText.includes("생산 입고")) {
+        throw new Error("Quick command audit log was not recorded");
+      }
+
+      setValue("#quickCommandInput", "그린자임 4리터 2개 불량 처리");
+      click("#quickCommandForm button[type='submit']");
+      await wait(200);
+      const defectPreview = q("#quickCommandPreview")?.textContent || "";
+      if (!defectPreview.includes("불량 보류") || !defectPreview.includes("불량")) {
+        throw new Error("Quick command defect preview did not move stock to defect");
+      }
+      click("#quickCommandApplyBtn");
+      await wait(350);
+      auditText = q("#auditList")?.textContent || "";
+      if (!auditText.includes("00006") || !auditText.includes("불량 보류")) {
+        throw new Error("Quick command defect audit log was not recorded");
+      }
+
+      setValue("#quickCommandInput", "그린자임 4리터 삼십개 생산");
+      click("#quickCommandForm button[type='submit']");
+      await wait(200);
+      const koreanQuantityPreview = q("#quickCommandPreview")?.textContent || "";
+      if (!koreanQuantityPreview.includes("한글 수량") || !q("#quickCommandApplyBtn")?.disabled) {
+        throw new Error("Korean quantity should be blocked instead of using the 4L size as quantity");
+      }
+
+      setValue("#quickCommandInput", "그린자임 4리터 2개 생산하고 라벨 2개 입고");
+      click("#quickCommandForm button[type='submit']");
+      await wait(200);
+      const multiCommandPreview = q("#quickCommandPreview")?.textContent || "";
+      if (!multiCommandPreview.includes("한 문장에는 작업 하나만") || !q("#quickCommandApplyBtn")?.disabled) {
+        throw new Error("Multiple quantities/actions in one sentence should be blocked");
+      }
 
       q("#searchInput").focus();
       document.body.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
@@ -116,6 +160,10 @@ async function runScenario(client) {
         operatorText,
         auditCount,
         latencyText,
+        quickCommand: previewText,
+        defectCommand: defectPreview,
+        koreanQuantityPreview,
+        multiCommandPreview,
         activeId,
         itemVisible: Boolean(q('[data-code="00027"]')),
         passed: true
@@ -161,7 +209,7 @@ try {
   ws.close();
   const output = {
     status: scenario.passed ? "PASS" : "FAIL",
-    passedScenarios: scenario.passed ? 2 : 0,
+    passedScenarios: scenario.passed ? 9 : 0,
     failedScenarios: scenario.passed ? 0 : 1,
     checkedAt: new Date().toISOString(),
     scenario

@@ -18,6 +18,7 @@ lighthouse-cli-output.txt
 
 # Generated screenshots and diffs
 *.png
+!visual_baseline_*.png
 
 # Local environment and credentials
 .env

@@ -70,10 +70,77 @@ const defaultState = {
   ]
 };
 
+const QUICK_ACTIONS = [
+  {
+    type: "discard",
+    label: "폐기 처리",
+    mode: "decrease",
+    risk: "high",
+    keywords: ["폐기", "버림", "손실", "제거"],
+    note: "위험 작업입니다. 선택 창고의 재고에서 수량을 완전히 제거합니다."
+  },
+  {
+    type: "defect",
+    label: "불량 보류",
+    mode: "move-to-defect",
+    risk: "high",
+    keywords: ["불량", "하자", "불량처리"],
+    note: "위험 작업입니다. 선택 창고의 정상 재고를 줄이고 불량 재고로 이동합니다."
+  },
+  {
+    type: "produce",
+    label: "생산 입고",
+    mode: "increase",
+    risk: "normal",
+    keywords: ["생산", "입고", "만들", "제조"],
+    note: "선택 창고의 완제품 재고에 수량을 더합니다."
+  }
+];
+
+const QUICK_ITEM_ALIASES = [
+  {
+    code: "00027",
+    aliases: ["그린메디20l", "그린메디20리터", "그린자임20l", "그린자임20리터", "greenmedi20l", "greenzyme20l"],
+    terms: ["그린메디", "그린자임", "greenmedi", "greenzyme"],
+    sizes: ["20l", "20리터"]
+  },
+  {
+    code: "00006",
+    aliases: ["그린메디4l", "그린메디4리터", "그린자임4l", "그린자임4리터", "greenmedi4l", "greenzyme4l"],
+    terms: ["그린메디", "그린자임", "greenmedi", "greenzyme"],
+    sizes: ["4l", "4리터"]
+  },
+  {
+    code: "00007",
+    aliases: ["그린메디500ml", "그린자임500ml", "greenmedi500ml", "greenzyme500ml"],
+    terms: ["그린메디", "그린자임", "greenmedi", "greenzyme"],
+    sizes: ["500ml"]
+  },
+  {
+    code: "00023",
+    aliases: ["2번박스", "b246호", "b-246호", "박스b246", "박스b-246"],
+    terms: ["박스", "box"],
+    sizes: ["2번", "b246"]
+  },
+  {
+    code: "00024",
+    aliases: ["3번박스", "58호", "박스58"],
+    terms: ["박스", "box"],
+    sizes: ["3번", "58호"]
+  },
+  {
+    code: "00265",
+    aliases: ["준스랩acc블루500ml", "acc블루500ml", "준스랩500ml"],
+    terms: ["준스랩", "acc블루", "acc"],
+    sizes: ["500ml"]
+  }
+];
+
 let state = loadState();
 let renderQueued = false;
 let flushTimer = null;
 let lastLatencyMs = 0;
+let pendingQuickCommand = null;
 
 const els = {
   operatorLabel: document.getElementById("operatorLabel"),
@@ -84,6 +151,11 @@ const els = {
   cancelLoginBtn: document.getElementById("cancelLoginBtn"),
   operatorIdInput: document.getElementById("operatorIdInput"),
   pinInput: document.getElementById("pinInput"),
+  quickCommandForm: document.getElementById("quickCommandForm"),
+  quickCommandInput: document.getElementById("quickCommandInput"),
+  quickCommandPreview: document.getElementById("quickCommandPreview"),
+  quickCommandApplyBtn: document.getElementById("quickCommandApplyBtn"),
+  quickCommandClearBtn: document.getElementById("quickCommandClearBtn"),
   searchInput: document.getElementById("searchInput"),
   warehouseSelect: document.getElementById("warehouseSelect"),
   fieldSelect: document.getElementById("fieldSelect"),
@@ -110,6 +182,13 @@ const els = {
   scopeField: document.getElementById("scopeField"),
   scopeOperator: document.getElementById("scopeOperator"),
   mobileModeBadge: document.getElementById("mobileModeBadge"),
+  commandCenterBadge: document.getElementById("commandCenterBadge"),
+  workTaskCount: document.getElementById("workTaskCount"),
+  workTaskList: document.getElementById("workTaskList"),
+  exceptionCount: document.getElementById("exceptionCount"),
+  exceptionList: document.getElementById("exceptionList"),
+  recommendationCount: document.getElementById("recommendationCount"),
+  recommendationList: document.getElementById("recommendationList"),
   toast: document.getElementById("toast")
 };
 
@@ -144,12 +223,153 @@ function normalize(value) {
   return String(value || "").trim().toLowerCase().replace(/\s+/g, "");
 }
 
+function compactCommandText(value) {
+  return normalize(value)
+    .replace(/ℓ/g, "l")
+    .replace(/리터/g, "l")
+    .replace(/[.,]/g, "");
+}
+
+function parseCommandQuantity(rawText) {
+  const text = String(rawText || "").replace(/,/g, "");
+  const digitMatches = Array.from(text.matchAll(/(\d+)\s*(개|ea|EA|병|통|박스|box|BOX)/g));
+  const koreanQuantity = /[일이삼사오육칠팔구십백천영공한두세네다섯여섯일곱여덟아홉스무서른마흔쉰예순일흔여든아흔]+\s*(개|병|통|박스)/.test(text);
+  if (koreanQuantity) {
+    return { ok: false, error: "한글 수량은 아직 지원하지 않습니다. 30개처럼 숫자와 단위를 함께 입력하세요." };
+  }
+  if (digitMatches.length > 1) {
+    return { ok: false, error: "수량 후보가 여러 개입니다. 한 문장에는 작업 하나만 입력하세요." };
+  }
+  if (digitMatches.length === 1) {
+    return { ok: true, quantity: Number(digitMatches[0][1]) };
+  }
+  return { ok: false, error: "수량은 30개처럼 숫자와 단위를 함께 입력하세요. 규격 숫자 4L은 수량으로 쓰지 않습니다." };
+}
+
+function parseCommandAction(compactText) {
+  return QUICK_ACTIONS.find((action) => {
+    return action.keywords.some((keyword) => compactText.includes(compactCommandText(keyword)));
+  }) || null;
+}
+
+function parseCommandWarehouse(compactText) {
+  if (compactText.includes("1층") || compactText.includes("1f")) return "1층 창고";
+  if (compactText.includes("2층") || compactText.includes("2f")) return "2층 창고";
+  return selectedWarehouse();
+}
+
+function parseCommandField(compactText, item, action) {
+  if (compactText.includes("라벨") || compactText.includes("label")) return "label";
+  if (compactText.includes("용기") || compactText.includes("container")) return "container";
+  if (compactText.includes("뚜껑") || compactText.includes("캡") || compactText.includes("cap")) return "cap";
+  if (compactText.includes("불량") || compactText.includes("defect")) return "finished";
+  if (action && action.type === "produce") return "finished";
+  return item.field || selectedField();
+}
+
+function findQuickCommandItem(rawText) {
+  const compactText = compactCommandText(rawText);
+  const scored = state.items.map((item) => {
+    const profile = QUICK_ITEM_ALIASES.find((entry) => entry.code === item.code) || {};
+    let score = 0;
+    if (compactText.includes(compactCommandText(item.code))) score += 12;
+    if (compactText.includes(compactCommandText(item.name))) score += 10;
+    (profile.aliases || []).forEach((alias) => {
+      if (compactText.includes(compactCommandText(alias))) score += 14;
+    });
+    (profile.terms || []).forEach((term) => {
+      if (compactText.includes(compactCommandText(term))) score += 2;
+    });
+    (profile.sizes || []).forEach((size) => {
+      if (compactText.includes(compactCommandText(size))) score += 4;
+    });
+    return { item, score };
+  }).filter((row) => row.score > 0).sort((a, b) => b.score - a.score);
+
+  if (!scored.length) {
+    return { error: "품목을 찾지 못했습니다. 품목명이나 코드를 더 정확히 적어주세요." };
+  }
+  if (scored.length > 1 && scored[0].score === scored[1].score) {
+    return { error: "품목 후보가 여러 개입니다. 4L, 20L, 500ml처럼 규격을 함께 적어주세요." };
+  }
+  return { item: scored[0].item };
+}
+
+function buildQuickCommand(rawText) {
+  const sourceText = String(rawText || "").trim();
+  const compactText = compactCommandText(sourceText);
+  if (!sourceText) return { ok: false, error: "작업 문장을 입력하세요." };
+
+  const match = findQuickCommandItem(sourceText);
+  if (match.error) return { ok: false, error: match.error, sourceText };
+
+  const action = parseCommandAction(compactText);
+  if (!action) {
+    return { ok: false, error: "작업을 찾지 못했습니다. 생산, 입고, 불량 처리, 폐기 중 하나를 적어주세요.", sourceText };
+  }
+
+  const quantityResult = parseCommandQuantity(sourceText);
+  if (!quantityResult.ok) {
+    return { ok: false, error: quantityResult.error, sourceText };
+  }
+  const quantity = quantityResult.quantity;
+  if (!Number.isFinite(quantity) || quantity <= 0 || Math.floor(quantity) !== quantity) {
+    return { ok: false, error: "수량은 1개 이상의 정수로 적어주세요.", sourceText };
+  }
+
+  const item = match.item;
+  const warehouse = parseCommandWarehouse(compactText);
+  const field = parseCommandField(compactText, item, action);
+  const before = locationQty(item, warehouse, field);
+  const delta = action.mode === "increase" ? quantity : -quantity;
+  const after = before + delta;
+  const defectBefore = locationQty(item, warehouse, "defect");
+  const defectAfter = action.mode === "move-to-defect" ? defectBefore + quantity : defectBefore;
+
+  if (after < 0) {
+    return {
+      ok: false,
+      error: `${item.name} ${warehouse} ${fieldLabel(field)} 재고가 ${before}개라서 ${quantity}개를 차감할 수 없습니다.`,
+      sourceText
+    };
+  }
+
+  return {
+    ok: true,
+    sourceText,
+    itemCode: item.code,
+    itemName: item.name,
+    actionType: action.type,
+    actionLabel: action.label,
+    actionNote: action.note,
+    actionMode: action.mode,
+    risk: action.risk,
+    quantity,
+    field,
+    targetField: action.mode === "move-to-defect" ? "defect" : "",
+    warehouse,
+    before,
+    after,
+    defectBefore,
+    defectAfter,
+    delta
+  };
+}
+
+function commandImpactText(command) {
+  if (command.actionMode === "move-to-defect") {
+    return `${fieldLabel(command.field)} ${formatNumber(command.before)} → ${formatNumber(command.after)}, ${fieldLabel(command.targetField)} ${formatNumber(command.defectBefore)} → ${formatNumber(command.defectAfter)}`;
+  }
+  return `${formatNumber(command.before)} → ${formatNumber(command.after)} (${command.delta > 0 ? "+" : ""}${formatNumber(command.delta)})`;
+}
+
 function fieldLabel(field) {
   return {
     finished: "완제품",
     label: "라벨",
     container: "용기",
-    cap: "뚜껑"
+    cap: "뚜껑",
+    defect: "불량"
   }[field] || field;
 }
 
@@ -205,11 +425,13 @@ function render() {
   const warehouse = selectedWarehouse();
   renderOperator();
   renderKpis(items, field, warehouse);
+  renderCommandCenter(items, field, warehouse);
   renderInventory(items, field, warehouse);
   renderCountList(items, field, warehouse);
   renderQueue();
   renderAudit();
   renderMap(items, field, warehouse);
+  renderQuickCommandPreview();
 }
 
 function scheduleRender() {
@@ -242,6 +464,97 @@ function renderKpis(items, field, warehouse) {
   els.scopeField.textContent = fieldLabel(field);
   els.scopeOperator.textContent = state.operator ? `${state.operator.id} · ${state.operator.role}` : "로그인 필요";
   els.mobileModeBadge.textContent = hasQueue ? "동기화 중" : "즉시 반영";
+}
+
+function commandRow(title, body, badge, tone, href) {
+  return {
+    title,
+    body,
+    badge,
+    tone: tone || "",
+    href: href || "#workbench"
+  };
+}
+
+function renderCommandRows(rows, emptyTitle, emptyBody) {
+  if (!rows.length) {
+    return `
+      <article class="lane-item is-empty">
+        <div>
+          <strong>${emptyTitle}</strong>
+          <span>${emptyBody}</span>
+        </div>
+      </article>
+    `;
+  }
+  return rows.slice(0, 4).map((row) => `
+    <article class="lane-item ${row.tone}">
+      <div>
+        <strong>${row.title}</strong>
+        <span>${row.body}</span>
+      </div>
+      <a class="lane-link" href="${row.href}">${row.badge}</a>
+    </article>
+  `).join("");
+}
+
+function renderCommandCenter(items, field, warehouse) {
+  const endpoint = localStorage.getItem(ENDPOINT_KEY) || "";
+  const pending = state.queue.length;
+  const retryJobs = state.queue.filter((job) => job.status === "retry" || job.attempts > 1);
+  const zeroItems = items.filter((item) => locationQty(item, warehouse, field) === 0);
+  const lowItems = items.filter((item) => {
+    const qty = locationQty(item, warehouse, field);
+    return qty > 0 && qty <= 3;
+  });
+  const recentDiffRows = state.audit.filter((row) => Number(row.delta || 0) !== 0);
+  const tasks = [];
+  const exceptions = [];
+  const recommendations = [];
+
+  if (pending) {
+    tasks.push(commandRow("미전송 저장 보내기", `${pending}건이 브라우저 안에 대기 중입니다.`, `${pending}건`, "is-warn", "#settings"));
+  }
+  if (items.length) {
+    tasks.push(commandRow("현재 필터 실사 진행", `${warehouse} · ${fieldLabel(field)} 기준 ${items.length}개 품목`, `${items.length}개`, "", "#mobile"));
+  }
+  if (recentDiffRows.length) {
+    tasks.push(commandRow("차이 품목 재확인", `최근 실사에서 차이가 난 기록 ${recentDiffRows.length}건`, `${recentDiffRows.length}건`, "is-blue", "#audit"));
+  }
+
+  if (!state.operator) {
+    exceptions.push(commandRow("작업자 로그인 필요", "저장과 감사 로그에 작업자 이름이 남아야 합니다.", "로그인", "is-danger", "#settings"));
+  }
+  if (retryJobs.length) {
+    exceptions.push(commandRow("전송 재시도 확인", `서버 저장 실패 또는 재시도 상태 ${retryJobs.length}건`, `${retryJobs.length}건`, "is-danger", "#settings"));
+  }
+  if (zeroItems.length) {
+    const names = zeroItems.slice(0, 2).map((item) => item.code).join(", ");
+    exceptions.push(commandRow("0 재고 품목 점검", `${names}${zeroItems.length > 2 ? " 외" : ""} 선택 창고 수량이 0입니다.`, `${zeroItems.length}개`, "is-danger", "#mobile"));
+  }
+  if (lowItems.length) {
+    const names = lowItems.slice(0, 2).map((item) => item.code).join(", ");
+    exceptions.push(commandRow("저재고 보충 후보", `${names}${lowItems.length > 2 ? " 외" : ""} 선택 창고 수량이 3개 이하입니다.`, `${lowItems.length}개`, "is-warn", "#inventory"));
+  }
+
+  if (!endpoint) {
+    recommendations.push(commandRow("Apps Script 연결", "실제 Google Sheets 저장을 위해 Web App URL을 연결하세요.", "연결", "is-blue", "#settings"));
+  }
+  recommendations.push(commandRow("문장 입력으로 처리", "예: 그린자임 4리터 30개 생산처럼 말로 작업을 넣습니다.", "입력", "", "#workbench"));
+  recommendations.push(commandRow("주기 실사 후보 만들기", "0 재고와 저재고 품목부터 주기 실사 대상으로 잡으세요.", "실사", "", "#mobile"));
+  if (recentDiffRows.length) {
+    recommendations.push(commandRow("차이 사유 남기기", "수량 차이가 반복되면 감사 로그에서 원인 메모를 확인해야 합니다.", "로그", "is-blue", "#audit"));
+  }
+
+  const riskCount = exceptions.length;
+  els.commandCenterBadge.textContent = riskCount ? `${riskCount}개 위험` : "정상";
+  els.commandCenterBadge.className = `badge ${riskCount ? "is-red" : "is-blue"}`;
+  els.workTaskCount.textContent = `${tasks.length}건`;
+  els.exceptionCount.textContent = `${exceptions.length}건`;
+  els.recommendationCount.textContent = `${recommendations.length}건`;
+  els.workTaskList.innerHTML = renderCommandRows(tasks, "오늘 작업 없음", "필터를 바꾸거나 빠른 작업을 입력하면 우선순위가 생깁니다.");
+  els.exceptionList.innerHTML = renderCommandRows(exceptions, "큰 위험 없음", "로그인, 전송, 0 재고 상태가 안정적입니다.");
+  els.recommendationList.innerHTML = renderCommandRows(recommendations, "추천 없음", "현재 흐름에서 추가 안내가 필요하지 않습니다.");
 }
 
 function renderInventory(items, field, warehouse) {
@@ -305,8 +618,8 @@ function renderAudit() {
   els.auditList.innerHTML = state.audit.slice(0, 12).map((row) => `
     <div class="audit-item">
       <div>
-        <strong>${row.itemCode} ${row.before} → ${row.after}</strong>
-        <span>${row.operator} · ${row.warehouse} · ${fieldLabel(row.field)} · ${row.time}</span>
+        <strong>${row.itemCode} ${row.label || "재고 실사"} ${row.impactText || `${row.before} → ${row.after}`}</strong>
+        <span>${row.operator} · ${row.warehouse} · ${fieldLabel(row.field)} · ${row.time}${row.sourceText ? ` · "${row.sourceText}"` : ""}</span>
       </div>
       <span class="badge ${row.delta === 0 ? "" : "is-blue"}">${row.delta > 0 ? "+" : ""}${row.delta}</span>
     </div>
@@ -326,6 +639,47 @@ function renderMap(items, field, warehouse) {
       </div>
     `;
   }).join("");
+}
+
+function renderQuickCommandPreview() {
+  if (!els.quickCommandPreview) return;
+  if (!pendingQuickCommand) {
+    els.quickCommandPreview.className = "quick-command-preview is-empty";
+    els.quickCommandPreview.innerHTML = `
+      <strong>아직 해석한 작업이 없습니다</strong>
+      <span>저장 전 확인 카드가 먼저 표시됩니다.</span>
+    `;
+    els.quickCommandApplyBtn.disabled = true;
+    return;
+  }
+
+  if (!pendingQuickCommand.ok) {
+    els.quickCommandPreview.className = "quick-command-preview is-error";
+    els.quickCommandPreview.innerHTML = `
+      <strong>해석 실패</strong>
+      <span>${pendingQuickCommand.error}</span>
+    `;
+    els.quickCommandApplyBtn.disabled = true;
+    return;
+  }
+
+  const command = pendingQuickCommand;
+  els.quickCommandPreview.className = `quick-command-preview ${command.risk === "high" ? "is-danger" : ""}`;
+  els.quickCommandPreview.innerHTML = `
+    <div class="quick-command-summary">
+      <strong>${command.actionLabel}</strong>
+      <span>${command.sourceText}</span>
+    </div>
+    <dl class="quick-command-grid">
+      <div><dt>품목</dt><dd>${command.itemCode} · ${command.itemName}</dd></div>
+      <div><dt>창고/구역</dt><dd>${command.warehouse} · ${fieldLabel(command.field)}</dd></div>
+      <div><dt>수량</dt><dd>${formatNumber(command.quantity)}개</dd></div>
+      <div><dt>반영</dt><dd>${commandImpactText(command)}</dd></div>
+      <div><dt>위험도</dt><dd>${command.risk === "high" ? "재고 감소/이동" : "일반 입고"}</dd></div>
+    </dl>
+    <p>${command.actionNote}</p>
+  `;
+  els.quickCommandApplyBtn.disabled = false;
 }
 
 function requireOperator() {
@@ -387,6 +741,109 @@ function saveCount(itemCode, countedValue) {
   scheduleFlush();
 }
 
+function previewQuickCommand() {
+  pendingQuickCommand = buildQuickCommand(els.quickCommandInput.value);
+  renderQuickCommandPreview();
+}
+
+function clearQuickCommand() {
+  pendingQuickCommand = null;
+  els.quickCommandInput.value = "";
+  renderQuickCommandPreview();
+}
+
+function applyQuickCommand() {
+  if (!pendingQuickCommand || !pendingQuickCommand.ok) {
+    showToast("먼저 작업 문장을 해석하세요.");
+    return;
+  }
+  if (!requireOperator()) return;
+
+  const started = performance.now();
+  const latestCommand = buildQuickCommand(pendingQuickCommand.sourceText);
+  if (!latestCommand.ok) {
+    pendingQuickCommand = latestCommand;
+    renderQuickCommandPreview();
+    showToast("재고 상태가 바뀌었거나 해석이 안전하지 않습니다. 다시 확인하세요.");
+    return;
+  }
+  if (
+    latestCommand.before !== pendingQuickCommand.before ||
+    latestCommand.after !== pendingQuickCommand.after ||
+    latestCommand.defectBefore !== pendingQuickCommand.defectBefore ||
+    latestCommand.defectAfter !== pendingQuickCommand.defectAfter
+  ) {
+    pendingQuickCommand = latestCommand;
+    renderQuickCommandPreview();
+    showToast("재고가 바뀌어 확인 카드를 새로 만들었습니다. 다시 확인하세요.");
+    return;
+  }
+
+  const command = latestCommand;
+  const item = state.items.find((candidate) => candidate.code === command.itemCode);
+  if (!item) {
+    showToast("품목을 다시 찾지 못했습니다. 새로 해석하세요.");
+    return;
+  }
+
+  if (!item.locations[command.warehouse]) item.locations[command.warehouse] = {};
+  item.locations[command.warehouse][command.field] = command.after;
+  recalcTotal(item, command.field);
+  if (command.actionMode === "move-to-defect") {
+    item.locations[command.warehouse][command.targetField] = command.defectAfter;
+    recalcTotal(item, command.targetField);
+  }
+
+  const auditRow = {
+    id: `a_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+    type: "quick-command",
+    itemCode: command.itemCode,
+    field: command.field,
+    warehouse: command.warehouse,
+    before: command.before,
+    after: command.after,
+    delta: command.delta,
+    label: command.actionLabel,
+    targetField: command.targetField,
+    defectBefore: command.defectBefore,
+    defectAfter: command.defectAfter,
+    risk: command.risk,
+    impactText: commandImpactText(command),
+    sourceText: command.sourceText,
+    operator: state.operator.name,
+    time: new Date().toLocaleString("ko-KR")
+  };
+  state.audit.unshift(auditRow);
+  state.queue.push({
+    id: `q_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+    action: "quickInventoryCommand",
+    itemCode: command.itemCode,
+    field: command.field,
+    warehouse: command.warehouse,
+    before: command.before,
+    after: command.after,
+    delta: command.delta,
+    label: command.actionLabel,
+    targetField: command.targetField,
+    defectBefore: command.defectBefore,
+    defectAfter: command.defectAfter,
+    risk: command.risk,
+    impactText: commandImpactText(command),
+    sourceText: command.sourceText,
+    status: "waiting",
+    attempts: 0,
+    auditId: auditRow.id
+  });
+
+  lastLatencyMs = performance.now() - started;
+  pendingQuickCommand = null;
+  els.quickCommandInput.value = "";
+  saveState();
+  scheduleRender();
+  showToast(`${command.actionLabel} ${formatNumber(command.quantity)}개를 화면에 반영했습니다.`);
+  scheduleFlush();
+}
+
 function scheduleFlush() {
   if (flushTimer) clearTimeout(flushTimer);
   flushTimer = setTimeout(flushQueue, 250);
@@ -424,14 +881,46 @@ function sendJob(job) {
   if (!endpoint) {
     return new Promise((resolve) => setTimeout(resolve, 850));
   }
+  const auth = operatorAuthPayload();
+  if (!auth.operatorSessionToken) {
+    throw new Error("Server login required");
+  }
+  return postEndpoint(job.action || "saveStockCount", { job, auth });
+}
+
+function postEndpoint(action, payload) {
+  const endpoint = localStorage.getItem(ENDPOINT_KEY) || "";
+  if (!endpoint) return Promise.reject(new Error("Endpoint is not configured"));
   return fetch(endpoint, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ action: "saveStockCount", job })
+    body: JSON.stringify(Object.assign({ action }, payload || {}))
   }).then((response) => {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.json().catch(() => ({}));
+  }).then((data) => {
+    if (data && data.ok === false) throw new Error(data.error || "Server rejected the request");
+    return data;
   });
+}
+
+function operatorAuthPayload() {
+  const operator = state.operator || {};
+  return {
+    operatorId: operator.id || operator.operatorId || "",
+    operatorSessionToken: operator.sessionToken || operator.operatorSessionToken || ""
+  };
+}
+
+function setOperatorFromServer(operator, sessionToken, sessionExpiresAt) {
+  const source = operator || {};
+  state.operator = {
+    id: source.operatorId || source.id || "",
+    name: source.name || "",
+    role: source.role || "",
+    sessionToken: sessionToken || source.sessionToken || "",
+    sessionExpiresAt: sessionExpiresAt || source.sessionExpiresAt || ""
+  };
 }
 
 function openLogin() {
@@ -447,9 +936,30 @@ function closeLogin() {
   else els.loginDialog.removeAttribute("open");
 }
 
-function login(operatorId, pin) {
+async function login(operatorId, pin) {
   const id = String(operatorId || "").trim().toUpperCase();
   const cleanPin = String(pin || "").trim();
+  const endpoint = localStorage.getItem(ENDPOINT_KEY) || "";
+  if (endpoint) {
+    try {
+      const data = await postEndpoint("authenticateOperator", {
+        operatorId: id,
+        pin: cleanPin,
+        sessionScope: "stock"
+      });
+      setOperatorFromServer(data.operator, data.sessionToken, data.sessionExpiresAt);
+      saveState();
+      render();
+      els.pinInput.value = "";
+      showToast("작업자 서버 로그인 완료");
+      closeLogin();
+      if (state.queue.length) scheduleFlush();
+    } catch (error) {
+      console.warn(error);
+      showToast("서버 로그인 실패. 작업자 ID/PIN 또는 배포 권한을 확인하세요.");
+    }
+    return;
+  }
   if (id === "DEMO01" && cleanPin === "0000") {
     state.operator = { id, name: "데모 관리자", role: "재고관리자" };
     saveState();
@@ -500,6 +1010,15 @@ function bindEvents() {
   ["input", "change"].forEach((eventName) => {
     els.searchInput.addEventListener(eventName, scheduleRender);
   });
+  els.quickCommandForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    previewQuickCommand();
+  });
+  els.quickCommandInput.addEventListener("input", () => {
+    if (pendingQuickCommand) previewQuickCommand();
+  });
+  els.quickCommandApplyBtn.addEventListener("click", applyQuickCommand);
+  els.quickCommandClearBtn.addEventListener("click", clearQuickCommand);
   els.warehouseSelect.addEventListener("change", scheduleRender);
   els.fieldSelect.addEventListener("change", scheduleRender);
   els.countList.addEventListener("click", (event) => {
@@ -531,6 +1050,11 @@ function bindEvents() {
   els.exportBtn.addEventListener("click", exportCsv);
   els.saveEndpointBtn.addEventListener("click", () => {
     localStorage.setItem(ENDPOINT_KEY, els.endpointInput.value.trim());
+    if (state.operator && !state.operator.sessionToken && els.endpointInput.value.trim()) {
+      state.operator = null;
+      saveState();
+      render();
+    }
     showToast("연결 주소를 저장했습니다.");
   });
 }

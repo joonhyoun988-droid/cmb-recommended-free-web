@@ -23,7 +23,7 @@
           <strong id="operatorLabel">로그인 필요</strong>
           <button class="ghost-btn" type="button" id="loginToggle">로그인</button>
           <button class="ghost-btn is-muted" type="button" id="logoutBtn">로그아웃</button>
-          <small>공개 데모 계정: DEMO01 / 0000</small>
+          <small>연결 주소가 없을 때만 데모 계정: DEMO01 / 0000</small>
         </section>
 
         <nav class="nav-list" aria-label="주요 화면">
@@ -80,6 +80,39 @@
           </article>
         </section>
 
+        <section class="wms-command-center" id="commandCenter" aria-label="작업 지휘판">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">WMS 지휘판</p>
+              <h2>먼저 처리할 일과 위험 신호를 자동으로 잡습니다</h2>
+            </div>
+            <span class="badge is-blue" id="commandCenterBadge">점검 중</span>
+          </div>
+          <div class="command-center-grid">
+            <section class="command-lane" aria-label="오늘 작업">
+              <div class="lane-head">
+                <strong>오늘 작업</strong>
+                <span id="workTaskCount">0건</span>
+              </div>
+              <div class="lane-list" id="workTaskList"></div>
+            </section>
+            <section class="command-lane is-exception" aria-label="예외와 위험">
+              <div class="lane-head">
+                <strong>예외/위험</strong>
+                <span id="exceptionCount">0건</span>
+              </div>
+              <div class="lane-list" id="exceptionList"></div>
+            </section>
+            <section class="command-lane is-recommendation" aria-label="추천 행동">
+              <div class="lane-head">
+                <strong>추천 행동</strong>
+                <span id="recommendationCount">0건</span>
+              </div>
+              <div class="lane-list" id="recommendationList"></div>
+            </section>
+          </div>
+        </section>
+
         <section class="workbench" id="workbench">
           <div class="workbench-head">
             <div>
@@ -105,10 +138,36 @@
                   <option value="label">라벨</option>
                   <option value="container">용기</option>
                   <option value="cap">뚜껑</option>
+                  <option value="defect">불량</option>
                 </select>
               </label>
             </div>
           </div>
+
+          <section class="panel quick-command-panel" aria-label="빠른 작업 입력">
+            <div class="panel-title">
+              <div>
+                <p class="eyebrow">빠른 작업 입력</p>
+                <h3>말하듯 적으면 품목·수량·작업을 해석합니다</h3>
+              </div>
+              <span class="badge is-blue">API 없음</span>
+            </div>
+            <form class="quick-command-form" id="quickCommandForm">
+              <label class="quick-command-input">
+                <span>작업 문장</span>
+                <input id="quickCommandInput" type="text" autocomplete="off" placeholder="예: 그린자임 4리터 30개 생산 / 그린자임 4리터 2개 불량 처리">
+              </label>
+              <button class="primary-btn" type="submit">해석</button>
+            </form>
+            <div class="quick-command-preview is-empty" id="quickCommandPreview" aria-live="polite">
+              <strong>아직 해석한 작업이 없습니다</strong>
+              <span>저장 전 확인 카드가 먼저 표시됩니다.</span>
+            </div>
+            <div class="quick-command-actions">
+              <button class="primary-btn" type="button" id="quickCommandApplyBtn" disabled>확인 후 반영</button>
+              <button class="secondary-btn" type="button" id="quickCommandClearBtn">비우기</button>
+            </div>
+          </section>
 
           <div class="operating-grid">
             <section class="panel inventory-panel" id="inventory" aria-label="현재 재고">
@@ -207,11 +266,11 @@
         <h2>작업자 ID로 시작합니다</h2>
         <label>
           <span>작업자 ID</span>
-          <input id="operatorIdInput" autocomplete="username" value="DEMO01">
+          <input id="operatorIdInput" autocomplete="username" value="JH001">
         </label>
         <label>
           <span>PIN</span>
-          <input id="pinInput" autocomplete="current-password" inputmode="numeric" type="password" value="0000">
+          <input id="pinInput" autocomplete="current-password" inputmode="numeric" type="password" value="">
         </label>
         <div class="dialog-actions">
           <button class="secondary-btn" value="cancel" type="button" id="cancelLoginBtn">취소</button>

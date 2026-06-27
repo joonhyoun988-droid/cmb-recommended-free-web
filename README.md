@@ -21,7 +21,8 @@ This folder is the public-preview-safe static prototype for the CMB inventory wo
 
 - `index.html`: page structure.
 - `styles.css`: visual design and responsive layout.
-- `app.js`: demo inventory state, login, count input, local queue, audit log, and optional Apps Script POST endpoint.
+- `app.js`: demo inventory state, login, count input, quick command input, local queue, audit log, and optional Apps Script POST endpoint.
+- `QUICK_COMMAND_INPUT.md`: sentence-to-inventory transaction rules.
 
 ## Proof And Operations
 

@@ -278,6 +278,11 @@ Scenarios covered:
 - Search item 00027
 - Enter a field count and save
 - Assert audit log and latency state changed
+- Parse quick command: Greenzyme 4L production
+- Apply quick command and assert audit log
+- Parse defect command and move stock to defect
+- Block Korean-word quantity so 4L is not mistaken as quantity
+- Block multi-action sentence with multiple quantities
 - Keyboard/focus smoke test
 
 Passed scenarios: $passedScenarios
