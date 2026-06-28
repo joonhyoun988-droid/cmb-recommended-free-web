@@ -1,0 +1,17 @@
+{
+  "token": "AUTONOMOUS_OPERATIONS_PRODUCT_CLOSURE_LOOP_V8_42",
+  "receipt": "AUTONOMOUS_OPERATIONS_PRODUCT_CLOSURE_RECEIPT",
+  "status": "PROJECT_AUTONOMOUS_OPERATIONS_RAIL_APPLIED",
+  "generatedAt": "2026-06-28 21:22:52 +09:00",
+  "projectPath": "C:\\Users\\joonh\\Documents\\Codex\\CMB_RECOMMENDED_FREE_WEB",
+  "statusTiers": [
+    "KNOWN_GAP",
+    "LOCAL_READY",
+    "REMOTE_SCHEDULED",
+    "ARTIFACT_PROVEN",
+    "LIVE_ENDPOINT_PROVEN",
+    "DECISION_GRADE_SIGNAL",
+    "PRODUCT_OPERATION_READY"
+  ],
+  "rule": "Do not claim autonomous operation, product readiness, world-class design, or world-class SaaS/WMS unless this project has matching evidence tier proof."
+}
