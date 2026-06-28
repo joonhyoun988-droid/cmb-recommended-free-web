@@ -1,7 +1,7 @@
 {
     "schema":  "cmb.cloudflare_telemetry_evidence.v1",
     "status":  "PASS",
-    "checkedAt":  "2026-06-28 13:30:55 +09:00",
+    "checkedAt":  "2026-06-28 21:04:31 +09:00",
     "workerName":  "cmb-telemetry",
     "endpoint":  "https://cmb-telemetry.joonhyoun988.workers.dev",
     "proofLevel":  "live_cloudflare_endpoint_proven",

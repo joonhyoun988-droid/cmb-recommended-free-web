@@ -2,7 +2,7 @@
 
 Status: `PASS`
 Proof level: `live_cloudflare_endpoint_proven`
-Checked: 2026-06-28 13:30:55 +09:00
+Checked: 2026-06-28 21:04:31 +09:00
 
 Endpoint:
 
