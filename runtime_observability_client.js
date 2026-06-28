@@ -3,6 +3,19 @@
 
   var KEY = "cmb_ops_events_v1";
   var MAX_EVENTS = 200;
+  var SESSION_KEY = "cmb_anonymous_session_v1";
+
+  function anonymousSessionId() {
+    try {
+      var existing = sessionStorage.getItem(SESSION_KEY);
+      if (existing) return existing;
+      var next = "s_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      sessionStorage.setItem(SESSION_KEY, next);
+      return next;
+    } catch (error) {
+      return "";
+    }
+  }
 
   function readEvents() {
     try {
@@ -45,7 +58,7 @@
     var payload = JSON.stringify({
       stream: "cmb_ops",
       version: 1,
-      event: event
+      event: toRemoteEvent(event)
     });
     try {
       if (navigator.sendBeacon) {
@@ -64,6 +77,28 @@
     } catch (error) {
       // Remote observability is optional and best-effort.
     }
+  }
+
+  function toRemoteEvent(event) {
+    return {
+      projectId: "cmb-inventory-web",
+      eventType: event.name,
+      metricName: event.name,
+      metricValue: metricValueFromDetail(event.detail),
+      severity: event.level,
+      route: location.hash || location.pathname,
+      appVersion: window.CMB_APP_VERSION || "local",
+      happenedAt: event.at,
+      anonymousSessionId: anonymousSessionId(),
+      proofId: document.documentElement.dataset.cmbProofId || ""
+    };
+  }
+
+  function metricValueFromDetail(detail) {
+    if (!detail || typeof detail !== "object") return null;
+    if (typeof detail.load === "number") return detail.load;
+    if (typeof detail.domContentLoaded === "number") return detail.domContentLoaded;
+    return null;
   }
 
   window.addEventListener("error", function (event) {

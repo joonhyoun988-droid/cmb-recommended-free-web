@@ -2,6 +2,6 @@ name = "cmb-telemetry"
 main = "cloudflare/telemetry-worker.js"
 compatibility_date = "2026-06-22"
 
-kv_namespaces = [
-  { binding = "CMB_TELEMETRY", id = "replace_with_kv_namespace_id" }
-]
+[[kv_namespaces]]
+binding = "CMB_TELEMETRY"
+id = "replace_with_kv_namespace_id"

@@ -1,6 +1,7 @@
 # Dependencies and temp files
 node_modules/
 .qa-temp/
+.wrangler/
 test-results/
 REMOTE_EVIDENCE_SNAPSHOT.json
 _site/
@@ -23,5 +24,7 @@ lighthouse-cli-output.txt
 # Local environment and credentials
 .env
 .env.*
+wrangler.toml
+wrangler-login.*.log
 *.pem
 *.key
