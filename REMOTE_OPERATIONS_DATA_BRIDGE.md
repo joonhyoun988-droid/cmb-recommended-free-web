@@ -8,7 +8,7 @@ Receipt: `REMOTE_OPERATIONS_DATA_BRIDGE_RECEIPT`
 - Current: `preview_operational`
 - Proven remote CI run: yes
 - Preview operational: yes
-- Production RUM monitoring: not yet
+- Production RUM monitoring: partial live endpoint proven, not full alerting
 - GitHub repository: `https://github.com/joonhyoun988-droid/cmb-recommended-free-web`
 - GitHub Pages URL: `https://joonhyoun988-droid.github.io/cmb-recommended-free-web/`
 - GitHub auth: `ok`
@@ -34,7 +34,7 @@ No-overclaim: CMB now has remote CI proof and an operational GitHub Pages previe
 | `REMOTE_ARTIFACT_RETENTION_LANE` | PASS | artifact `cmb-frontend-proof-eafbe2ed943cc50d534953cc800ef335fc955d22`, expires `2026-07-22T03:20:53Z` | Keep 30-day artifact retention or move durable records to vault. |
 | `PREVIEW_DEPLOYMENT_LANE` | PASS | Pages URL HTTP 200; deploy run `27927359316` succeeded | Add deeper health checks as the app grows. |
 | `OPERABILITY_TELEMETRY_LANE` | READY | `OPERATIONS_TELEMETRY_PLAN.md` | Connect logs/metrics/traces provider after deployment. |
-| `RUM_WEB_VITALS_LANE` | READY | `REAL_USER_METRICS_SCHEMA.json` | Collect only after privacy review and deployment. |
+| `RUM_WEB_VITALS_LANE` | LIVE_CLOUDFLARE_ENDPOINT_PROVEN | `REAL_USER_METRICS_SCHEMA.json`, `CLOUDFLARE_TELEMETRY_EVIDENCE.md` | Add dashboard trend review and alert routing before full production monitoring claim. |
 | `DORA_INCIDENT_LANE` | READY | `DORA_METRICS_PLAN.md` | Fill real values after recurring releases. |
 | `PRIVACY_CONSENT_LANE` | READY | `REAL_USER_DATA_PRIVACY_BOUNDARY.md` | Review before collecting live user data. |
 | `NO_OVERCLAIM_LANE` | PASS | `preview_operational`, not `production_rum_monitoring` | Final answers must keep this distinction. |
@@ -44,6 +44,8 @@ No-overclaim: CMB now has remote CI proof and an operational GitHub Pages previe
 ## Deployment Slots
 
 - preview_url: `https://joonhyoun988-droid.github.io/cmb-recommended-free-web/`
+- telemetry_endpoint: `https://cmb-telemetry.joonhyoun988.workers.dev`
+- telemetry_evidence_command: `.\collect_cloudflare_telemetry_evidence.ps1`
 - environment: GitHub Pages
 - health_check: HTTP 200 and critical flow proof
 - rollback: restore previous git commit or prior packaged folder

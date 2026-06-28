@@ -1,0 +1,35 @@
+{
+    "schema":  "cmb.cloudflare_telemetry_evidence.v1",
+    "status":  "PASS",
+    "checkedAt":  "2026-06-28 13:30:55 +09:00",
+    "workerName":  "cmb-telemetry",
+    "endpoint":  "https://cmb-telemetry.joonhyoun988.workers.dev",
+    "proofLevel":  "live_cloudflare_endpoint_proven",
+    "privacyBoundary":  "safe_allowlist_only_no_raw_pii",
+    "deploymentsExitCode":  0,
+    "deploymentCount":  2,
+    "latestDeployment":  {
+                             "id":  "1b059379-0c26-41a8-b653-f659e4ef2aab",
+                             "source":  "wrangler",
+                             "strategy":  "percentage",
+                             "authorEmail":  "joonhyoun988@gmail.com",
+                             "createdOn":  "2026-06-28T04:04:02.457Z",
+                             "versions":  [
+                                              {
+                                                  "version_id":  "9a8a835c-4680-4388-9111-c0347acfa52b",
+                                                  "percentage":  100
+                                              }
+                                          ]
+                         },
+    "head":  {
+                 "status":  405,
+                 "expected":  "405 means endpoint is alive and rejects non-POST methods",
+                 "ok":  true
+             },
+    "post":  {
+                 "status":  200,
+                 "ok":  true,
+                 "bodyContainsOk":  true
+             },
+    "nextAction":  "Review Cloudflare request/error/latency in dashboard and keep this evidence refreshed after deploys."
+}

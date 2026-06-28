@@ -10,8 +10,8 @@ Updated: 2026-06-22
 |---|---|---|---|
 | `REPORT_DIRTY_PRESSURE_LANE` | WARN_OS | AI-OS `97_Benchmark_Results` dirty pressure is tracked outside this project | Clean/compact generated report churn at OS level, not inside CMB app files. |
 | `PROJECT_ADOPTION_LANE` | PASS | `EFFICIENCY_GOVERNOR.md`, `RESPONSIVE_PREVIEW_QA.md`, this file | Keep new OS criteria copied/adapted when they affect active projects. |
-| `RUM_FIELD_DATA_LANE` | READY_LOCAL_PLUS_ENDPOINT_READY | `rum_web_vitals_client.js`, `telemetry_config.js`, `RUM_FIELD_DATA.md` | Deploy remote field collection before production RUM claims. |
-| `OBSERVABILITY_SIGNAL_LANE` | READY_LOCAL_PLUS_ENDPOINT_READY | `runtime_observability_client.js`, `ops_alert_rules.json`, `telemetry_worker_example.js` | Deploy logs/metrics/traces/alerts sink when production monitoring is needed. |
+| `RUM_FIELD_DATA_LANE` | LIVE_CLOUDFLARE_ENDPOINT_PROVEN | `rum_web_vitals_client.js`, `telemetry_config.js`, `CLOUDFLARE_TELEMETRY_EVIDENCE.md` | Keep Cloudflare evidence refreshed and add dashboard trend review. |
+| `OBSERVABILITY_SIGNAL_LANE` | LIVE_CLOUDFLARE_ENDPOINT_PROVEN_NOT_ALERTING | `runtime_observability_client.js`, `ops_alert_rules.json`, `CLOUDFLARE_TELEMETRY_EVIDENCE.md` | Add alert routing after enough real events exist. |
 | `REMOTE_PROOF_LANE` | PASS | `REMOTE_EVIDENCE_SNAPSHOT.json`, GitHub Actions run `27927359323`, artifact `7782537320`, Pages HTTP 200 | Refresh snapshot after release proof runs. |
 | `ONE_SCREEN_COCKPIT_LANE` | PASS | `PRODUCT_OPS_COCKPIT.md` + `platform-dashboard.html` + this cockpit | Keep generated dashboard data fresh. |
 | `TOP_001_PLATFORM_GAP_LANE` | EXECUTION_STAGED | `TOP_001_PERCENT_PLATFORM_GAP_PLAN.md`, `PLATFORM_GAP_EXECUTION_CLOSURE.md` | Remaining true boundary is deployed telemetry and stronger GitHub ruleset proof. |
@@ -23,11 +23,11 @@ AUTOMATED_OPERATIONS_COCKPIT_RECEIPT:
 - generated_report_policy: classify and clean via AI-OS report lifecycle
 - project_adoption_status: adopted
 - project_missing_docs: none for v8.09/v8.10/v8.11
-- rum_status: READY_LOCAL_PLUS_ENDPOINT_READY
-- observability_status: READY_LOCAL_PLUS_ENDPOINT_READY
+- rum_status: LIVE_CLOUDFLARE_ENDPOINT_PROVEN
+- observability_status: LIVE_CLOUDFLARE_ENDPOINT_PROVEN_NOT_ALERTING
 - remote_proof_status: preview_operational
 - one_screen_cockpit_status: markdown cockpit plus static web dashboard present
-- five_star_bottlenecks: OS report pressure, deployed production RUM endpoint, live alerting sink
-- next_action: keep CMB docs green; deploy telemetry endpoint only when production monitoring is needed
+- five_star_bottlenecks: OS report pressure, Cloudflare dashboard ingestion into AI-OS cockpit, live alerting sink
+- next_action: refresh Cloudflare evidence after deploys; pull dashboard request/error/latency into AI-OS cockpit
 - no_overclaim_label: local proof is not production monitoring
 ```

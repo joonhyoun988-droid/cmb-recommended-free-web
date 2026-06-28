@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-28T00:06:00+09:00",
+  "updatedAt": "2026-06-28T13:28:00+09:00",
   "project": "CMB_RECOMMENDED_FREE_WEB",
   "proofLevel": "remote_ci_and_pages_proven",
   "summary": {
@@ -7,8 +7,8 @@
     "localGit": "clean_before_evidence_update",
     "remoteProof": "PASS",
     "previewDeploy": "PASS",
-    "productionRum": "NOT_YET",
-    "liveObservability": "NOT_YET",
+    "productionRum": "PARTIAL_LIVE_ENDPOINT_PROVEN",
+    "liveObservability": "PARTIAL_LIVE_ENDPOINT_PROVEN",
     "serverRuntimeAuthProbe": "NOT_YET"
   },
   "lanes": [
@@ -44,15 +44,15 @@
     },
     {
       "name": "RUM/Web Vitals",
-      "status": "READY_LOCAL_PLUS_ENDPOINT_READY",
-      "evidence": "rum_web_vitals_client.js, telemetry_config.js",
-      "next": "Set a privacy-safe rum endpoint before production monitoring claims."
+      "status": "LIVE_CLOUDFLARE_ENDPOINT_PROVEN",
+      "evidence": "rum_web_vitals_client.js, telemetry_config.js, CLOUDFLARE_TELEMETRY_EVIDENCE.md",
+      "next": "Refresh Cloudflare evidence after deploys and add dashboard trend review."
     },
     {
       "name": "Logs/metrics/traces/alerts",
-      "status": "READY_LOCAL_PLUS_ENDPOINT_READY",
-      "evidence": "runtime_observability_client.js, ops_alert_rules.json",
-      "next": "Set a privacy-safe ops endpoint and alert sink."
+      "status": "LIVE_CLOUDFLARE_ENDPOINT_PROVEN_NOT_ALERTING",
+      "evidence": "runtime_observability_client.js, ops_alert_rules.json, CLOUDFLARE_TELEMETRY_EVIDENCE.md",
+      "next": "Add alert routing after enough real events exist."
     },
     {
       "name": "Living design system",
@@ -74,9 +74,9 @@
     },
     {
       "name": "Cloudflare telemetry",
-      "status": "PILOT_READY_NOT_DEPLOYED",
-      "evidence": "cloudflare/telemetry-worker.js, deploy_cloudflare_telemetry_worker.ps1",
-      "next": "Deploy Worker only after privacy and retention policy are approved."
+      "status": "LIVE_SAFE_CONTRACT_DEPLOYED",
+      "evidence": "CLOUDFLARE_TELEMETRY_DEPLOY_RECEIPT.md, CLOUDFLARE_TELEMETRY_EVIDENCE.md",
+      "next": "Pull request/error/latency trends into the cockpit instead of manual dashboard checking."
     },
     {
       "name": "Sentry Free",
@@ -123,7 +123,9 @@
     "pages": "https://joonhyoun988-droid.github.io/cmb-recommended-free-web/",
     "version": "https://joonhyoun988-droid.github.io/cmb-recommended-free-web/version.json",
     "artifact": "cmb-frontend-proof-884910fc192fbd75a191afe286e4197d51943d6c",
-    "artifactDigest": "sha256:bedb2fa71a8680d5b5054166142e0dd982c5bdfeafc0ea669a1a639272f596b0"
+    "artifactDigest": "sha256:bedb2fa71a8680d5b5054166142e0dd982c5bdfeafc0ea669a1a639272f596b0",
+    "telemetryEndpoint": "https://cmb-telemetry.joonhyoun988.workers.dev",
+    "telemetryEvidence": "CLOUDFLARE_TELEMETRY_EVIDENCE.md"
   },
   "aiOs": {
     "repo": "joonhyoun988-droid/ai-os-primary",
