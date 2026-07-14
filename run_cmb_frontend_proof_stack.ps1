@@ -128,9 +128,10 @@ try {
   Start-Sleep -Seconds 2
   Invoke-WebRequest -Uri $Url -UseBasicParsing -TimeoutSec 8 | Out-Null
 
-  cmd /c npx playwright screenshot --viewport-size=1440,980 $Url $DesktopShot | Out-Null
+  $screenshotScript = Join-Path $Root "qa\cmb-screenshot-cdp.mjs"
+  & $NodePath $screenshotScript $Url $ChromePath $DesktopShot 1440 980 desktop | Out-Null
   if ($LASTEXITCODE -ne 0) { throw "Desktop screenshot failed." }
-  cmd /c npx playwright screenshot --viewport-size=390,1300 $Url $MobileShot | Out-Null
+  & $NodePath $screenshotScript $Url $ChromePath $MobileShot 390 1300 mobile | Out-Null
   if ($LASTEXITCODE -ne 0) { throw "Mobile screenshot failed." }
 
   if (-not (Test-Path -LiteralPath $DesktopBaseline)) {

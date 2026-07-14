@@ -1,6 +1,6 @@
 # Claude Work Order: CMB First Collaborative Product Pass
 
-Status: `PLAN_ONLY`
+Status: `PHASE_1_QA_IMPLEMENTATION_APPROVED`
 Owner goal: turn the existing public demo into a faster, clearer field inventory experience without weakening its operational character.
 
 ## Evidence already observed
@@ -43,3 +43,7 @@ Owner goal: turn the existing public demo into a faster, clearer field inventory
 - Package installation.
 - Replacing the static architecture with React/Next.js.
 - Large documentation or governance expansion.
+
+## Codex review received
+
+Read `CODEX_PLAN_REVIEW.md`. Only the offline-capable screenshot proof route is approved now. The CSS visual-order proposal is rejected pending an accessible DOM/focus revision. Stop after writing `CLAUDE_HANDOFF_REPORT.md` and the revised product plan.
