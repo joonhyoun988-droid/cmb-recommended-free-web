@@ -1,6 +1,6 @@
 # Claude Work Order: CMB First Collaborative Product Pass
 
-Status: `PHASE_1_QA_IMPLEMENTATION_APPROVED`
+Status: `PHASE_2_MOBILE_VERTICAL_SLICE_APPROVED`
 Owner goal: turn the existing public demo into a faster, clearer field inventory experience without weakening its operational character.
 
 ## Evidence already observed
@@ -47,3 +47,7 @@ Owner goal: turn the existing public demo into a faster, clearer field inventory
 ## Codex review received
 
 Read `CODEX_PLAN_REVIEW.md`. Only the offline-capable screenshot proof route is approved now. The CSS visual-order proposal is rejected pending an accessible DOM/focus revision. Stop after writing `CLAUDE_HANDOFF_REPORT.md` and the revised product plan.
+
+## Phase 2 approval
+
+The revised real-DOM-order and post-login focus approach is approved for one vertical slice. Implement Change 1 only in `index.html`, `app.js`, and `styles.css`. Do not implement Change 2 reference/token documentation yet. Produce fresh 390x844 and 1440x900 owner-review screenshots, run functional and accessibility checks, update `CLAUDE_HANDOFF_REPORT.md`, and stop without staging, committing, pushing, deploying, or replacing regression baselines.

@@ -42,3 +42,18 @@ The proposed token substitution and three reference rows are useful cleanup, but
 ## Git and external boundaries
 
 Do not stage, commit, push, deploy, install packages, change accounts, use production data, or overwrite visual baselines. Codex will independently verify and selectively commit reviewed files.
+
+## Revised plan decision
+
+Decision: `PHASE_2_CHANGE_1_APPROVED`
+
+The revised plan removes CSS-only reordering and uses real DOM order plus a mobile post-login focus move. Implement only Change 1:
+
+- move `#workbench` before KPI/WMS sections in `index.html`;
+- move the count-entry panel before the inventory table in DOM order;
+- remove the old mobile CSS `order` declarations;
+- focus `#searchInput` after successful mobile login;
+- capture 390x844 and 1440x900 owner-review screenshots;
+- prove login, search, count/save, quick command, queue, audit, keyboard focus, no horizontal overflow, and desktop density.
+
+Do not implement the token/reference cleanup yet. Stop after updating the handoff report so Codex and the owner can compare the actual before/after screens.
