@@ -1,9 +1,12 @@
-# CLAUDE Handoff Report: Offline QA Screenshot Route
+# CLAUDE Handoff Report: Offline QA Screenshot Route + Phase 2 Mobile Vertical Slice
 
-Status: `IMPLEMENTED_AND_RUN` (Change 3 only, per conditional approval)
+Status: `IMPLEMENTED_AND_RUN` — Change 3 (offline screenshot route) and Phase 2 (Change 1: mobile field-first DOM reorder + focus move) are both implemented and run. Change 2 (visual token cleanup) remains **not implemented**, per `CLAUDE_WORK_ORDER.md` Phase 2 approval explicitly scoping this pass to Change 1 only. See §9 onward below for the Phase 2 section; §1-8 are the original Change 3 report, unchanged.
+
+---
+
+# Part A — Change 3: Offline QA Screenshot Route
+
 Scope approved: implement and run only the offline-capable screenshot route (`qa/cmb-screenshot-cdp.mjs` + `run_cmb_frontend_proof_stack.ps1` screenshot lines). No npm install, no network download, no `git add`/commit/push, no deploy, no baseline screenshot replacement. All honored — see §5.
-
-Change 1 (mobile field-first flow) and Change 2 (visual token cleanup) were **not** implemented this pass. Change 1's CSS `order` approach was rejected by review (visual vs. keyboard/screen-reader order divergence) and is being redesigned in `CLAUDE_IMPLEMENTATION_PLAN.md` per the new instructions, separately from this report.
 
 ---
 
@@ -163,3 +166,125 @@ Regenerated report/JSON/PNG artifacts (`preview_*.png`, `visual_diff_*.png`, `*-
 ---
 
 Stopping here per instruction. `CLAUDE_IMPLEMENTATION_PLAN.md` is being separately updated with the redesigned mobile approach (DOM-order or post-login focus move, with an exact 390×844 focus-order table) before any further product file is touched.
+
+---
+
+# Part B — Phase 2: Mobile Vertical Slice (`PHASE_2_MOBILE_VERTICAL_SLICE_APPROVED`)
+
+Scope approved (`CLAUDE_WORK_ORDER.md` "Phase 2 approval"): implement Change 1 only, in `index.html`, `app.js`, and `styles.css`. Do not implement Change 2. Produce fresh 390×844 and 1440×900 owner-review screenshots. Run functional and accessibility checks. Update this report. Stop without staging, committing, pushing, deploying, or replacing regression baselines.
+
+## 9. What was actually implemented — and what was deliberately deferred
+
+The revised design in `CLAUDE_IMPLEMENTATION_PLAN.md` §2 had three parts: (a) move `#workbench` above the KPI/WMS block, (b) also reorder `.mobile-panel`/`.inventory-panel` inside `.operating-grid`, (c) post-login focus move. **(a) and (c) are implemented. (b) is deferred** — a real conflict was found while implementing that the plan's self-review did not catch; explaining it here rather than silently picking a side.
+
+### (a) — Implemented: `index.html`, physical section move
+
+`<section class="workbench" id="workbench">…</section>` (previously `index.html:116-209`, third child of `<main>`) now sits immediately after `</header>` and before `<section class="status-strip">` — a real cut-and-paste, not a CSS visual reorder. New top-to-bottom order of `<main>`'s direct children on every viewport: `.topbar` → `#workbench` → `.status-strip` → `.wms-command-center` → `.ops-row` → `.audit-panel`. Confirmed no CSS selector in `styles.css` depends on this sibling order (`grep` for `+`/`~` combinators and `.main >` found nothing), so no `styles.css` change was needed or made for this part.
+
+### (b) — Deferred: `.mobile-panel`/`.inventory-panel` internal reorder
+
+While drafting the edit, checked `.operating-grid`'s actual CSS (`styles.css:594-596`):
+
+```css
+.operating-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(370px, 0.92fr);
+  gap: 14px;
+}
+```
+
+Neither `.inventory-panel` nor `.mobile-panel` has an explicit `grid-column`/`grid-area` anywhere in `styles.css` — desktop's two-column placement (table gets the wider 1.08fr column, count-cards get the narrower 0.92fr column) is decided purely by **DOM order** (auto-placement). This creates a real conflict that the written plan did not resolve:
+
+- If `.mobile-panel` moves before `.inventory-panel` in the DOM (as planned, to fix mobile's internal stacking + tab order), desktop's implicit grid placement flips too — the count-entry panel would land in the wide left column and the inventory **table would be squeezed into the narrower 370px-minimum column**. That is a real desktop density regression, not a cosmetic one (the table has 6 columns: 코드/품목/구역/총 재고/선택 창고/상태).
+- The alternative — pinning desktop's columns explicitly via `grid-column` so the table keeps the wide column regardless of DOM order — reintroduces exactly the visual/DOM/tab-order divergence Codex rejected, just moved from the `.main`-level (6 items, up to ~16 tab stops) down to this 2-item pair (smaller blast radius, but the same defect class).
+
+Given `CODEX_PLAN_REVIEW.md`'s explicit standard ("never let visual order differ from DOM/keyboard/screen-reader order"), neither option was implemented silently. **`.mobile-panel`/`.inventory-panel` and their pre-existing `order: -1`/`order: 1` pair (`styles.css:1264-1270`, inside `@media (max-width: 760px)`) are unchanged this phase.** This pair predates this work order; it is a smaller, already-existing divergence (2 items, not 6), and (a) alone already delivers the core ask — see §11 below, the field task is now reachable within the first mobile viewport without touching this pair. Recommend a dedicated follow-up decision (owner/Codex) choosing between: keep as-is, accept a desktop column-width change, or leave it as documented tech debt — not bundling it into this slice's implicit scope.
+
+### (c) — Implemented: `app.js`, post-login focus move
+
+New function, plus one call site added in each of `login()`'s two success branches (`app.js`, DEMO and server-auth paths):
+
+```javascript
+function focusFieldEntryOnMobile() {
+  if (!window.matchMedia("(max-width: 760px)").matches) return;
+  setTimeout(() => els.searchInput?.focus(), 0);
+}
+```
+
+Called immediately after `closeLogin();` in both branches. Gated to the existing 760px breakpoint, so desktop keyboard behavior is unchanged (confirmed no `matchMedia` call fires focus logic above 760px). `els.searchInput` already existed in the element map (`app.js:159`); no new lookup added.
+
+## 10. Commands run this phase
+
+```powershell
+node --check app.js                                            # PASS
+node local-preview-server.mjs 8767                              # server up, HTTP 200 confirmed
+node qa/cmb-critical-flow-cdp.mjs http://127.0.0.1:8767/index.html "<chrome path>"   # functional
+npx -y @axe-core/cli http://127.0.0.1:8767/index.html --save phase2-axe-report.json --chrome-path "<chrome path>" --chromedriver-path "<chromedriver path>" --no-reporter   # accessibility
+node qa/cmb-screenshot-cdp.mjs http://127.0.0.1:8767/index.html "<chrome path>" phase2_mobile_390x844.png 390 844 mobile
+node qa/cmb-screenshot-cdp.mjs http://127.0.0.1:8767/index.html "<chrome path>" phase2_desktop_1440x900.png 1440 900 desktop
+```
+
+The full `run_cmb_frontend_proof_stack.ps1` was **not** re-run this phase — Phase 2 approval asked specifically for "functional and accessibility checks" plus the two named screenshot sizes, not the full regression stack (which would just re-report the already-diagnosed, unrelated desktop-font-rendering `WARN` and telemetry-config `FAIL` from Part A against stale baselines).
+
+## 11. Real results
+
+### Functional — PASS, 9/9 scenarios, unchanged from pre-reorder baseline
+
+```json
+{"status":"PASS","passedScenarios":9,"failedScenarios":0}
+```
+
+Covers: DEMO01/0000 login, item search, count entry + save, audit log update, quick-command parse + apply (production and defect paths), Korean-word-quantity rejection, multi-action-sentence rejection, keyboard/focus smoke. All 9 pass identically to the pre-Phase-2 run reported in Part A — the DOM move did not break any `id`-based wiring, confirming the earlier risk analysis (`app.js` has no positional selectors).
+
+### Accessibility — 0 violations, 2 incomplete, unchanged from baseline
+
+```json
+{"violations":0,"incomplete":2,"passes":41}
+INCOMPLETE: aria-prohibited-attr serious 3 nodes
+INCOMPLETE: color-contrast serious 13 nodes
+```
+
+Same violation/incomplete counts as `ACCESSIBILITY_AUDIT_REPORT.md`'s pre-existing baseline (`axeViolations: 0`, `axeIncomplete: 2` from Part A's run) — the reorder introduced zero new automated a11y findings. The 2 incomplete categories are pre-existing and unrelated to this change (axe flags them as needing manual review regardless of section order).
+
+### Owner-review screenshots — captured at the exact sizes requested
+
+| File | Size | Confirms |
+|---|---|---|
+| `phase2_mobile_390x844.png` | 390×844 (exact) | Topbar + full `#workbench` header/hero visible with **zero KPI/WMS content in view** — the primary field task is now the entire first viewport after the command hero, with no scroll needed to reach the search input. |
+| `phase2_desktop_1440x900.png` | 1440×900 (exact) | Topbar → full `#workbench` (search/filters, quick-command panel, inventory table + count-entry side by side, **table still in its original wide column, count-cards still in the original narrow column** — confirms §9(b)'s deferral did not regress desktop density) → KPI/WMS strip pushed below the fold, still present, one scroll away. |
+
+Both PNGs visually inspected: mobile shows nothing between the command hero and the search/filter row (the "dashboard tax" is gone from the first screen); desktop shows the identical two-column table/count-card layout as before the reorder, just resequenced after the topbar instead of after the KPI/WMS block.
+
+## 12. Before / after — the concrete change
+
+- **Before (Part A baseline):** mobile scroll order = topbar → 4 KPI cards → WMS board (3 lanes) → search/filters → quick-command → count-entry → table → queue/map/settings → audit. First 390×844 viewport showed only the topbar and part of the KPI strip.
+- **After (this phase):** mobile scroll order = topbar → search/filters → quick-command → count-entry → table → 4 KPI cards → WMS board → queue/map/settings → audit. First 390×844 viewport shows the topbar and the full search/filter row — screenshot-confirmed above.
+- Keyboard: on mobile, focus lands in `#searchInput` automatically the instant login succeeds (no manual Tabbing required at all, not just fewer tab stops).
+- Desktop: same content reachable, resequenced (workbench before KPI/WMS instead of after); internal table/count-card column widths unchanged (verified in the 1440×900 screenshot).
+
+## 13. Risks and residual items
+
+| Item | Status |
+|---|---|
+| `.mobile-panel`/`.inventory-panel` internal order (§9(b)) | **Deferred**, not silently resolved — needs an explicit owner/Codex decision among the three options in §9. |
+| Desktop section sequence now differs from the pre-work-order baseline | Accepted tradeoff, screenshot-evidenced in §11, not silently assumed — flagged per `CLAUDE_IMPLEMENTATION_PLAN.md` §8. |
+| `#logoutBtn` unreachable on mobile (`display: none` regardless of login state) | Pre-existing, unrelated, unchanged this phase — noted for a future work order. |
+| Focus-move timing (`setTimeout(…, 0)`) | Not separately load-tested this phase; the interaction scenario script's own keyboard/focus smoke test passed, which exercises focus handling on the same page, giving indirect but not conclusive coverage. |
+
+## 14. Compliance confirmation (Phase 2)
+
+- No `npm install`, no network download beyond the already-approved `npx @axe-core/cli` invocation (a read-only scan, not a package install for the product).
+- No `git add`, `git commit`, `git push`, or deploy command run.
+- `visual_baseline_desktop.png`/`visual_baseline_mobile.png` not touched (not even read this phase).
+- Only `index.html` and `app.js` were edited; `styles.css` was deliberately **not** touched this phase (§9(b) deferral) even though Phase 2 approval permitted editing it.
+- Change 2 (reference/token documentation) was not implemented, per explicit Phase 2 scope.
+
+## 15. Rollback (Phase 2)
+
+```powershell
+git checkout -- index.html app.js
+```
+
+`phase2-axe-report.json`, `phase2-interaction-report.json`, `phase2_mobile_390x844.png`, `phase2_desktop_1440x900.png`, and their stderr logs are new evidence files, not product code; safe to delete or keep for owner review, no rollback action needed.
+
+Stopping here per instruction. Awaiting Codex/owner review of the DOM move, the §9(b) deferral decision, and whether to proceed to Change 2.

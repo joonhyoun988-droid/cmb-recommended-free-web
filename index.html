@@ -61,58 +61,6 @@
           </div>
         </header>
 
-        <section class="status-strip" aria-label="오늘 상태">
-          <article>
-            <span>대상 품목</span>
-            <strong id="kpiItems">0</strong>
-          </article>
-          <article>
-            <span>미전송</span>
-            <strong id="kpiQueue">0</strong>
-          </article>
-          <article>
-            <span>차이 품목</span>
-            <strong id="kpiDiff">0</strong>
-          </article>
-          <article>
-            <span>화면 반응</span>
-            <strong id="kpiLatency">0.0초</strong>
-          </article>
-        </section>
-
-        <section class="wms-command-center" id="commandCenter" aria-label="작업 지휘판">
-          <div class="panel-title">
-            <div>
-              <p class="eyebrow">WMS 지휘판</p>
-              <h2>먼저 처리할 일과 위험 신호를 자동으로 잡습니다</h2>
-            </div>
-            <span class="badge is-blue" id="commandCenterBadge">점검 중</span>
-          </div>
-          <div class="command-center-grid">
-            <section class="command-lane" aria-label="오늘 작업">
-              <div class="lane-head">
-                <strong>오늘 작업</strong>
-                <span id="workTaskCount">0건</span>
-              </div>
-              <div class="lane-list" id="workTaskList"></div>
-            </section>
-            <section class="command-lane is-exception" aria-label="예외와 위험">
-              <div class="lane-head">
-                <strong>예외/위험</strong>
-                <span id="exceptionCount">0건</span>
-              </div>
-              <div class="lane-list" id="exceptionList"></div>
-            </section>
-            <section class="command-lane is-recommendation" aria-label="추천 행동">
-              <div class="lane-head">
-                <strong>추천 행동</strong>
-                <span id="recommendationCount">0건</span>
-              </div>
-              <div class="lane-list" id="recommendationList"></div>
-            </section>
-          </div>
-        </section>
-
         <section class="workbench" id="workbench">
           <div class="workbench-head">
             <div>
@@ -204,6 +152,58 @@
                 <span class="badge" id="mobileModeBadge">즉시 반영</span>
               </div>
               <div id="countList" class="count-list"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="status-strip" aria-label="오늘 상태">
+          <article>
+            <span>대상 품목</span>
+            <strong id="kpiItems">0</strong>
+          </article>
+          <article>
+            <span>미전송</span>
+            <strong id="kpiQueue">0</strong>
+          </article>
+          <article>
+            <span>차이 품목</span>
+            <strong id="kpiDiff">0</strong>
+          </article>
+          <article>
+            <span>화면 반응</span>
+            <strong id="kpiLatency">0.0초</strong>
+          </article>
+        </section>
+
+        <section class="wms-command-center" id="commandCenter" aria-label="작업 지휘판">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">WMS 지휘판</p>
+              <h2>먼저 처리할 일과 위험 신호를 자동으로 잡습니다</h2>
+            </div>
+            <span class="badge is-blue" id="commandCenterBadge">점검 중</span>
+          </div>
+          <div class="command-center-grid">
+            <section class="command-lane" aria-label="오늘 작업">
+              <div class="lane-head">
+                <strong>오늘 작업</strong>
+                <span id="workTaskCount">0건</span>
+              </div>
+              <div class="lane-list" id="workTaskList"></div>
+            </section>
+            <section class="command-lane is-exception" aria-label="예외와 위험">
+              <div class="lane-head">
+                <strong>예외/위험</strong>
+                <span id="exceptionCount">0건</span>
+              </div>
+              <div class="lane-list" id="exceptionList"></div>
+            </section>
+            <section class="command-lane is-recommendation" aria-label="추천 행동">
+              <div class="lane-head">
+                <strong>추천 행동</strong>
+                <span id="recommendationCount">0건</span>
+              </div>
+              <div class="lane-list" id="recommendationList"></div>
             </section>
           </div>
         </section>

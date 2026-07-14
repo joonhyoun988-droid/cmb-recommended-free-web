@@ -27,6 +27,8 @@ Change 1 now touches `index.html` and `app.js` in addition to `styles.css` — t
 
 ## 2. Change 1 — Mobile field-first flow (redesigned)
 
+**Status: (a) and (c) implemented and run under `PHASE_2_MOBILE_VERTICAL_SLICE_APPROVED`; (b) deferred.** While implementing, found that `.operating-grid` (`styles.css:594-596`) has no explicit `grid-column`/`grid-area` on its children — desktop's two-column widths are decided purely by DOM order, so moving `.mobile-panel` before `.inventory-panel` (part (b) below) would either squeeze the 6-column inventory table into the narrower column (real desktop density regression) or require pinning columns explicitly, which reintroduces the exact visual/DOM divergence Codex rejected, at smaller scope. (b) was not implemented; full reasoning and options are in `CLAUDE_HANDOFF_REPORT.md` §9. Real functional (9/9 pass), accessibility (0 violations, 2 pre-existing incomplete, unchanged), and 390×844 / 1440×900 screenshot results are in `CLAUDE_HANDOFF_REPORT.md` §10-12 — not duplicated here.
+
 ### Why the CSS-order design was rejected
 
 `order` (flex or grid) changes *visual* position without changing *DOM* position. Tab order and screen-reader linear reading order both follow DOM position, not CSS. The rejected design would have made sighted mobile users see the search/count-entry task first while keyboard and screen-reader users still had to pass through 4 KPI cards and up to 12 WMS lane links (`.lane-link`, see below) first — a real, not theoretical, divergence. `VERIFY.md` requires "keyboard focus… do not regress," so this design is dropped entirely, not patched.

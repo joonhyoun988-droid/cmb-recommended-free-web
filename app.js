@@ -953,6 +953,7 @@ async function login(operatorId, pin) {
       els.pinInput.value = "";
       showToast("작업자 서버 로그인 완료");
       closeLogin();
+      focusFieldEntryOnMobile();
       if (state.queue.length) scheduleFlush();
     } catch (error) {
       console.warn(error);
@@ -966,9 +967,15 @@ async function login(operatorId, pin) {
     render();
     showToast("작업자 로그인 완료");
     closeLogin();
+    focusFieldEntryOnMobile();
     return;
   }
   showToast("작업자 ID 또는 PIN을 확인하세요.");
+}
+
+function focusFieldEntryOnMobile() {
+  if (!window.matchMedia("(max-width: 760px)").matches) return;
+  setTimeout(() => els.searchInput?.focus(), 0);
 }
 
 function exportCsv() {

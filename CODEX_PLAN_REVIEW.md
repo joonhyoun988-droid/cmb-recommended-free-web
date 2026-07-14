@@ -57,3 +57,11 @@ The revised plan removes CSS-only reordering and uses real DOM order plus a mobi
 - prove login, search, count/save, quick command, queue, audit, keyboard focus, no horizontal overflow, and desktop density.
 
 Do not implement the token/reference cleanup yet. Stop after updating the handoff report so Codex and the owner can compare the actual before/after screens.
+
+## Phase 2 implementation review
+
+Decision: `PHASE_2A_ACCEPTED_WITH_FOLLOWUP`
+
+Codex independently confirmed the real `#workbench -> .status-strip -> #commandCenter` DOM order, valid JavaScript syntax, no duplicate HTML IDs, the exact 390x844 and 1440x900 screenshots, and Claude's 9/9 functional result with zero automated axe violations. The mobile first viewport now reaches the field-search task and the desktop inventory/count density remains intact.
+
+The internal `.mobile-panel` / `.inventory-panel` DOM mismatch is explicitly deferred rather than treated as complete. Its existing mobile CSS `order` rules remain technical debt and require a separate layout decision that preserves both desktop table width and DOM/keyboard order. Do not bundle that decision into this accepted Phase 2A checkpoint.
