@@ -273,20 +273,9 @@
           <input id="pinInput" autocomplete="current-password" inputmode="numeric" type="password" value="">
         </label>
         <button class="ghost-btn" type="button" id="showPinRecoveryBtn">PIN을 잊으셨나요?</button>
-        <div id="pinRecoveryFields" hidden>
-          <p>이 앱을 배포한 회사 Google 계정으로 새 6–8자리 PIN을 정합니다.</p>
-          <label>
-            <span>새 PIN</span>
-            <input id="newPinInput" autocomplete="new-password" inputmode="numeric" maxlength="8" placeholder="숫자 6–8자리" type="password">
-          </label>
-          <label>
-            <span>새 PIN 확인</span>
-            <input id="confirmPinInput" autocomplete="new-password" inputmode="numeric" maxlength="8" placeholder="같은 PIN을 다시 입력" type="password">
-          </label>
-        </div>
         <div class="dialog-actions">
           <button class="secondary-btn" value="cancel" type="button" id="cancelLoginBtn">취소</button>
-          <button class="primary-btn" value="default" type="submit" id="loginSubmitBtn">로그인</button>
+          <button class="primary-btn" value="default" type="submit">로그인</button>
         </div>
       </form>
     </dialog>
