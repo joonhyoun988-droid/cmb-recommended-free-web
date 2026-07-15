@@ -132,6 +132,26 @@ async function runScenarios(client, mockUrl) {
     detail: { authOk, authBad }
   });
 
+  // 7. getInventory requires a valid session (direct HTTP, no browser)
+  const unauthGetInventory = await postMock(mockUrl, { action: "getInventory", auth: { operatorSessionToken: "not-a-real-token" } });
+  scenarios.push({
+    name: "getInventory rejects an unauthenticated/invalid session",
+    passed: unauthGetInventory.ok === false && typeof unauthGetInventory.error === "string",
+    detail: { unauthGetInventory }
+  });
+
+  // 8. logoutOperator revokes the session exactly once and blocks a later authenticated read (direct HTTP)
+  const freshAuth = await postMock(mockUrl, { action: "authenticateOperator", operatorId: "MOCKOP", pin: "8080", sessionScope: "stock" });
+  const firstLogout = await postMock(mockUrl, { action: "logoutOperator", auth: { operatorSessionToken: freshAuth.sessionToken } });
+  const secondLogout = await postMock(mockUrl, { action: "logoutOperator", auth: { operatorSessionToken: freshAuth.sessionToken } });
+  const readAfterLogout = await postMock(mockUrl, { action: "getInventory", auth: { operatorSessionToken: freshAuth.sessionToken } });
+  scenarios.push({
+    name: "logoutOperator revokes the session and blocks a later authenticated read",
+    passed: freshAuth.ok === true && firstLogout.revoked === 1 && secondLogout.revoked === 0
+      && readAfterLogout.ok === false && typeof readAfterLogout.error === "string",
+    detail: { firstLogout, secondLogout, readAfterLogout }
+  });
+
   // 4. Replay of the same job ID without a duplicate business write (direct HTTP, saveStockCount + quickInventoryCommand)
   const saveAuth = { operatorId: authOk.operator.operatorId, operatorSessionToken: authOk.sessionToken };
   const replaySaveJob = { id: "contract-replay-save-1", itemCode: "00159", field: "완제품(창고)", warehouse: "1층 창고", before: 10, after: 12, label: "재고 실사 저장", attempts: 2 };
@@ -180,19 +200,77 @@ async function runScenarios(client, mockUrl) {
 
       setValue("#searchInput", "00027");
       await wait(250);
+      const inventoryBeforeSaveText = q('[data-code="00027"] .count-values')?.textContent || "";
       setValue('[data-count="00027"]', "950");
       click('[data-save="00027"]');
-      await wait(500);
+      await wait(700);
       const saveToastText = q("#toast")?.textContent || "";
       const queueAfterSave = q("#queueBadge")?.textContent || "";
+      const inventoryAfterSaveText = q('[data-code="00027"] .count-values')?.textContent || "";
+      const tokenAfterLogin = JSON.parse(localStorage.getItem("cmb.free.web.operator.v1") || "null")?.sessionToken || "";
 
-      return { operatorText, loginToastText, saveToastText, queueAfterSave };
+      return { operatorText, loginToastText, saveToastText, queueAfterSave, inventoryBeforeSaveText, inventoryAfterSaveText, tokenAfterLogin };
     })()
   `);
   scenarios.push({
     name: "authenticateOperator + saveStockCount success (browser)",
     passed: step2.operatorText.includes("MOCKOP") && step2.saveToastText.includes("완료") && step2.queueAfterSave.startsWith("0"),
     detail: step2
+  });
+
+  // 9. browser login loads authoritative mock quantities, not pre-existing demo/persisted quantities
+  const authoritativeLoaded = step2.inventoryBeforeSaveText.includes("555")
+    && step2.inventoryBeforeSaveText.includes("500")
+    && !step2.inventoryBeforeSaveText.includes("906")
+    && !step2.inventoryBeforeSaveText.includes("900");
+  scenarios.push({
+    name: "browser login loads authoritative mock quantities, not pre-existing demo quantities",
+    passed: authoritativeLoaded,
+    detail: { inventoryBeforeSaveText: step2.inventoryBeforeSaveText }
+  });
+
+  // 10. save write refreshes authoritative inventory in the browser after a successful server write
+  const clientRefreshedAfterWrite = step2.inventoryAfterSaveText.includes("1,005") && step2.inventoryAfterSaveText.includes("950");
+  scenarios.push({
+    name: "save write refreshes authoritative inventory in the browser",
+    passed: clientRefreshedAfterWrite && step2.queueAfterSave.startsWith("0"),
+    detail: { inventoryAfterSaveText: step2.inventoryAfterSaveText }
+  });
+
+  // 11. saveStockCount write actually updates the mock's authoritative inventory (server-side proof)
+  const postWriteInventory = await postMock(mockUrl, { action: "getInventory", auth: { operatorSessionToken: step2.tokenAfterLogin } });
+  const item00027AfterWrite = (postWriteInventory.items || []).find((entry) => entry.code === "00027") || {};
+  scenarios.push({
+    name: "saveStockCount write updates the mock's authoritative inventory (server-side)",
+    passed: postWriteInventory.ok === true
+      && item00027AfterWrite.stocks && item00027AfterWrite.stocks.finished === 1005
+      && item00027AfterWrite.locations && item00027AfterWrite.locations["2층 창고"] && item00027AfterWrite.locations["2층 창고"].finished === 950,
+    detail: { postWriteInventory }
+  });
+
+  // 12. no configured-endpoint mutation can occur before live inventory readiness
+  const step9 = await evalInPage(client, `
+    (async () => {
+      ${pageHelpers}
+      setValue("#searchInput", "00006");
+      await wait(200);
+      liveInventory = { endpoint: "", sessionToken: "", ready: false };
+      const before = q('[data-code="00006"] .count-values')?.textContent || "";
+      setValue('[data-count="00006"]', "999");
+      click('[data-save="00006"]');
+      await wait(300);
+      const toastText = q("#toast")?.textContent || "";
+      const queueBadge = q("#queueBadge")?.textContent || "";
+      const after = q('[data-code="00006"] .count-values')?.textContent || "";
+      const restored = await fetchLiveInventory();
+      return { toastText, queueBadge, before, after, restored };
+    })()
+  `);
+  scenarios.push({
+    name: "no configured-endpoint mutation before live inventory readiness",
+    passed: step9.toastText.includes("먼저 불러와야") && step9.queueBadge.startsWith("0")
+      && step9.before === step9.after && step9.restored === true,
+    detail: step9
   });
 
   // 3. Retry after a network/server failure without losing the queued job (item 00007 is the mock's transient-failure trigger)
@@ -217,7 +295,7 @@ async function runScenarios(client, mockUrl) {
     (async () => {
       ${pageHelpers}
       click("#flushNowBtn");
-      await wait(500);
+      await wait(800);
       return { toastText: q("#toast")?.textContent || "", queueBadge: q("#queueBadge")?.textContent || "" };
     })()
   `);
@@ -261,7 +339,7 @@ async function runScenarios(client, mockUrl) {
       setValue("#operatorIdInput", "MOCKOP");
       setValue("#pinInput", "8080");
       click("#loginForm button[type='submit']");
-      await wait(600);
+      await wait(900);
       return { toastText: q("#toast")?.textContent || "", queueBadge: q("#queueBadge")?.textContent || "" };
     })()
   `);
@@ -279,7 +357,7 @@ async function runScenarios(client, mockUrl) {
       click("#quickCommandForm button[type='submit']");
       await wait(200);
       click("#quickCommandApplyBtn");
-      await wait(500);
+      await wait(800);
       return { toastText: q("#toast")?.textContent || "", queueBadge: q("#queueBadge")?.textContent || "" };
     })()
   `);
@@ -298,6 +376,78 @@ async function runScenarios(client, mockUrl) {
     name: "quickInventoryCommand request shape matches Code.gs contract",
     passed: quickShapeOk && step6.queueBadge.startsWith("0"),
     detail: { step6, lastBody }
+  });
+
+  // 13. saving a new endpoint through the UI revokes the old server session (session-revoke fix)
+  const secondMock = createMockProviderServer();
+  const mockUrl2 = await secondMock.listen(0);
+  const step8 = await evalInPage(client, `
+    (async () => {
+      ${pageHelpers}
+      const tokenBeforeChange = JSON.parse(localStorage.getItem("cmb.free.web.operator.v1") || "null")?.sessionToken || "";
+
+      // Saving the same endpoint must not touch the local session.
+      setValue("#endpointInput", ${JSON.stringify(mockUrl)});
+      click("#saveEndpointBtn");
+      await wait(300);
+      const operatorAfterSameEndpointSave = q("#operatorLabel")?.textContent || "";
+      const storedOperatorAfterSameEndpointSave = JSON.parse(localStorage.getItem("cmb.free.web.operator.v1") || "null");
+      const sameEndpointSessionPreserved = operatorAfterSameEndpointSave.includes("MOCKOP")
+        && storedOperatorAfterSameEndpointSave?.sessionToken === tokenBeforeChange;
+
+      setValue("#endpointInput", ${JSON.stringify(mockUrl2)});
+      click("#saveEndpointBtn");
+      await wait(500);
+      const operatorAfterChange = q("#operatorLabel")?.textContent || "";
+      const storedOperator = JSON.parse(localStorage.getItem("cmb.free.web.operator.v1") || "null");
+      return { tokenBeforeChange, sameEndpointSessionPreserved, operatorAfterChange, sessionCleared: !storedOperator };
+    })()
+  `);
+  const oldEndpointReadAfterChange = await postMock(mockUrl, { action: "getInventory", auth: { operatorSessionToken: step8.tokenBeforeChange } });
+  scenarios.push({
+    name: "saving a new endpoint through the UI revokes the old server session",
+    passed: !!step8.tokenBeforeChange && step8.sameEndpointSessionPreserved
+      && step8.operatorAfterChange.includes("로그인 필요") && step8.sessionCleared
+      && oldEndpointReadAfterChange.ok === false && typeof oldEndpointReadAfterChange.error === "string",
+    detail: { step8, oldEndpointReadAfterChange }
+  });
+  await secondMock.close();
+
+  // Restore the original mock endpoint and re-login so the remaining scenarios can proceed.
+  await evalInPage(client, `
+    (async () => {
+      ${pageHelpers}
+      setValue("#endpointInput", ${JSON.stringify(mockUrl)});
+      click("#saveEndpointBtn");
+      await wait(300);
+      click("#loginToggle");
+      await wait(150);
+      setValue("#operatorIdInput", "MOCKOP");
+      setValue("#pinInput", "8080");
+      click("#loginForm button[type='submit']");
+      await wait(900);
+      return true;
+    })()
+  `);
+
+  // 14. logout best-effort revokes the server session and a later authenticated read with that token fails
+  const step7 = await evalInPage(client, `
+    (async () => {
+      ${pageHelpers}
+      const tokenBeforeLogout = JSON.parse(localStorage.getItem("cmb.free.web.operator.v1") || "null")?.sessionToken || "";
+      click("#logoutBtn");
+      await wait(500);
+      const operatorAfterLogout = q("#operatorLabel")?.textContent || "";
+      const storedOperator = JSON.parse(localStorage.getItem("cmb.free.web.operator.v1") || "null");
+      return { tokenBeforeLogout, operatorAfterLogout, sessionCleared: !storedOperator };
+    })()
+  `);
+  const postLogoutRead = await postMock(mockUrl, { action: "getInventory", auth: { operatorSessionToken: step7.tokenBeforeLogout } });
+  scenarios.push({
+    name: "logout revokes the server session and a later authenticated read fails",
+    passed: !!step7.tokenBeforeLogout && step7.operatorAfterLogout.includes("로그인 필요") && step7.sessionCleared
+      && postLogoutRead.ok === false && typeof postLogoutRead.error === "string",
+    detail: { step7, postLogoutRead }
   });
 
   return scenarios;

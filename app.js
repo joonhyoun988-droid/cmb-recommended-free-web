@@ -141,6 +141,7 @@ let renderQueued = false;
 let flushTimer = null;
 let lastLatencyMs = 0;
 let pendingQuickCommand = null;
+let liveInventory = { endpoint: "", sessionToken: "", ready: false };
 
 const els = {
   operatorLabel: document.getElementById("operatorLabel"),
@@ -691,6 +692,7 @@ function requireOperator() {
 
 function saveCount(itemCode, countedValue) {
   if (!requireOperator()) return;
+  if (!requireLiveInventory()) return;
   const started = performance.now();
   const field = selectedField();
   const warehouse = selectedWarehouse();
@@ -758,6 +760,7 @@ function applyQuickCommand() {
     return;
   }
   if (!requireOperator()) return;
+  if (!requireLiveInventory()) return;
 
   const started = performance.now();
   const latestCommand = buildQuickCommand(pendingQuickCommand.sourceText);
@@ -854,6 +857,15 @@ async function flushQueue() {
     scheduleRender();
     return;
   }
+  const endpoint = currentEndpoint();
+  if (endpoint && !isLiveReady()) {
+    const refreshed = await fetchLiveInventory();
+    if (!refreshed) {
+      showToast("재고를 불러온 뒤에 저장을 보낼 수 있습니다. 로그인하거나 새로고침하세요.");
+      scheduleRender();
+      return;
+    }
+  }
   const job = state.queue[0];
   job.status = "sending";
   job.attempts += 1;
@@ -864,10 +876,19 @@ async function flushQueue() {
     state.queue.shift();
     saveState();
     showToast("미전송 저장 1건을 완료했습니다.");
+    if (endpoint) {
+      const refreshedAfterWrite = await fetchLiveInventory();
+      if (!refreshedAfterWrite) {
+        showToast("저장은 완료됐지만 최신 재고를 다시 불러오지 못했습니다. 로그인하거나 새로고침하세요.");
+        scheduleRender();
+        return;
+      }
+    }
   } catch (error) {
     if (error.sessionExpired) {
       job.status = "needs-login";
       if (state.operator) state.operator.sessionToken = "";
+      invalidateLiveInventory();
       saveState();
       showToast("로그인이 만료되었습니다. 다시 로그인하면 대기 중인 저장이 이어집니다.");
       console.warn(error);
@@ -882,7 +903,7 @@ async function flushQueue() {
     return;
   }
   scheduleRender();
-  if (state.queue.length) scheduleFlush();
+  if (state.queue.length && isLiveReady()) scheduleFlush();
 }
 
 function sendJob(job) {
@@ -897,8 +918,8 @@ function sendJob(job) {
   return postEndpoint(job.action || "saveStockCount", { job, auth });
 }
 
-function postEndpoint(action, payload) {
-  const endpoint = localStorage.getItem(ENDPOINT_KEY) || "";
+function postEndpoint(action, payload, endpointOverride) {
+  const endpoint = endpointOverride || localStorage.getItem(ENDPOINT_KEY) || "";
   if (!endpoint) return Promise.reject(new Error("Endpoint is not configured"));
   return fetch(endpoint, {
     method: "POST",
@@ -927,6 +948,83 @@ function operatorAuthPayload() {
     operatorId: operator.id || operator.operatorId || "",
     operatorSessionToken: operator.sessionToken || operator.operatorSessionToken || ""
   };
+}
+
+function currentEndpoint() {
+  return localStorage.getItem(ENDPOINT_KEY) || "";
+}
+
+function invalidateLiveInventory() {
+  liveInventory = { endpoint: "", sessionToken: "", ready: false };
+}
+
+function isLiveReady() {
+  const endpoint = currentEndpoint();
+  if (!endpoint) return true;
+  const token = operatorAuthPayload().operatorSessionToken;
+  return !!token && liveInventory.ready && liveInventory.endpoint === endpoint && liveInventory.sessionToken === token;
+}
+
+function requireLiveInventory() {
+  if (isLiveReady()) return true;
+  showToast("재고를 먼저 불러와야 합니다. 로그인하거나 재고를 새로고침하세요.");
+  return false;
+}
+
+function applyInventorySnapshot(data) {
+  const rawItems = Array.isArray(data && data.items) ? data.items : [];
+  const safeItems = rawItems.filter((item) => item && typeof item.code === "string" && item.code.trim().length > 0);
+  if (!safeItems.length) return false;
+  state.items = safeItems.map((item) => ({
+    code: String(item.code),
+    name: String(item.name || item.code),
+    field: item.field || "finished",
+    stocks: Object.assign({}, item.stocks || {}),
+    locations: Object.assign({}, item.locations || {})
+  }));
+  saveState();
+  return true;
+}
+
+async function fetchLiveInventory() {
+  const endpoint = currentEndpoint();
+  if (!endpoint) return true;
+  const auth = operatorAuthPayload();
+  if (!auth.operatorSessionToken) {
+    invalidateLiveInventory();
+    return false;
+  }
+  try {
+    const data = await postEndpoint("getInventory", { auth });
+    if (!applyInventorySnapshot(data)) {
+      invalidateLiveInventory();
+      return false;
+    }
+    liveInventory = { endpoint, sessionToken: auth.operatorSessionToken, ready: true };
+    return true;
+  } catch (error) {
+    console.warn("getInventory failed:", error && error.message);
+    invalidateLiveInventory();
+    return false;
+  }
+}
+
+async function logout() {
+  const endpoint = currentEndpoint();
+  const auth = operatorAuthPayload();
+  try {
+    if (endpoint && auth.operatorSessionToken) {
+      await postEndpoint("logoutOperator", { auth });
+    }
+  } catch (error) {
+    console.warn("logoutOperator failed:", error && error.message);
+  } finally {
+    state.operator = null;
+    invalidateLiveInventory();
+    saveState();
+    render();
+    showToast("로그아웃했습니다.");
+  }
 }
 
 function setOperatorFromServer(operator, sessionToken, sessionExpiresAt) {
@@ -968,10 +1066,12 @@ async function login(operatorId, pin) {
       saveState();
       render();
       els.pinInput.value = "";
-      showToast("작업자 서버 로그인 완료");
       closeLogin();
       focusFieldEntryOnMobile();
-      if (state.queue.length) scheduleFlush();
+      const ready = await fetchLiveInventory();
+      render();
+      showToast(ready ? "작업자 서버 로그인 완료" : "로그인은 됐지만 재고를 불러오지 못했습니다. 새로고침 후 다시 시도하세요.");
+      if (ready && state.queue.length) scheduleFlush();
     } catch (error) {
       console.warn(error);
       showToast("서버 로그인 실패. 작업자 ID/PIN 또는 배포 권한을 확인하세요.");
@@ -1060,10 +1160,7 @@ function bindEvents() {
   els.loginToggle.addEventListener("click", openLogin);
   els.cancelLoginBtn.addEventListener("click", closeLogin);
   els.logoutBtn.addEventListener("click", () => {
-    state.operator = null;
-    saveState();
-    render();
-    showToast("로그아웃했습니다.");
+    logout();
   });
   els.loginForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -1072,22 +1169,45 @@ function bindEvents() {
   els.flushNowBtn.addEventListener("click", flushQueue);
   els.resetDemoBtn.addEventListener("click", resetDemo);
   els.exportBtn.addEventListener("click", exportCsv);
-  els.saveEndpointBtn.addEventListener("click", () => {
-    localStorage.setItem(ENDPOINT_KEY, els.endpointInput.value.trim());
-    if (state.operator && !state.operator.sessionToken && els.endpointInput.value.trim()) {
+  els.saveEndpointBtn.addEventListener("click", async () => {
+    const oldEndpoint = currentEndpoint();
+    const newEndpoint = els.endpointInput.value.trim();
+    if (newEndpoint === oldEndpoint) {
+      showToast("연결 주소를 저장했습니다.");
+      return;
+    }
+    const auth = operatorAuthPayload();
+    try {
+      if (oldEndpoint && auth.operatorSessionToken) {
+        await postEndpoint("logoutOperator", { auth }, oldEndpoint).catch((error) => {
+          console.warn("logoutOperator failed:", error && error.message);
+        });
+      }
+    } finally {
+      localStorage.setItem(ENDPOINT_KEY, newEndpoint);
+      invalidateLiveInventory();
       state.operator = null;
       saveState();
       render();
+      showToast("연결 주소를 저장했습니다.");
     }
-    showToast("연결 주소를 저장했습니다.");
   });
 }
 
-function init() {
-  els.endpointInput.value = localStorage.getItem(ENDPOINT_KEY) || "";
+async function init() {
+  els.endpointInput.value = currentEndpoint();
   bindEvents();
   render();
-  if (state.queue.length) scheduleFlush();
+  const endpoint = currentEndpoint();
+  if (!endpoint) {
+    if (state.queue.length) scheduleFlush();
+    return;
+  }
+  const auth = operatorAuthPayload();
+  if (!auth.operatorSessionToken) return;
+  const ready = await fetchLiveInventory();
+  render();
+  if (ready && state.queue.length) scheduleFlush();
 }
 
 init();

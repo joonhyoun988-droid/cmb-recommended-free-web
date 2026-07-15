@@ -5,11 +5,86 @@ const MOCK_OPERATOR = { operatorId: "MOCKOP", pin: "8080", name: "모의 작업�
 const TRANSIENT_FAILURE_TRIGGER_ITEM_CODE = "00007";
 const SESSION_TTL_MS = 4 * 60 * 60 * 1000;
 const EXPIRED_MESSAGE = "로그인이 만료되었습니다. 다시 로그인하세요.";
+const MOCK_LOCATIONS = ["1층 창고", "2층 창고"];
+const MOCK_FIELD_KEYS = ["finished", "label", "container", "cap", "pump", "singlebox", "other", "bigbox"];
+const MOCK_BUILD_ID = "mock-build-2026-07-15";
+
+function emptyFieldMap() {
+  const map = {};
+  MOCK_FIELD_KEYS.forEach((key) => { map[key] = 0; });
+  return map;
+}
+
+function createInventoryStore() {
+  const items = new Map();
+  function addItem(code, name, field, locationSeed) {
+    const locations = {};
+    MOCK_LOCATIONS.forEach((location) => {
+      locations[location] = Object.assign(emptyFieldMap(), locationSeed[location] || {});
+    });
+    const stocks = emptyFieldMap();
+    MOCK_FIELD_KEYS.forEach((key) => {
+      stocks[key] = MOCK_LOCATIONS.reduce((sum, location) => sum + Number(locations[location][key] || 0), 0);
+    });
+    items.set(code, { code, name, field, stocks, locations });
+  }
+  // Deliberately distinct from app.js's built-in demo/persisted quantities so a
+  // successful server login can be proven to load authoritative mock data.
+  addItem("00027", "그린메디 / 20L", "finished", {
+    "2층 창고": { finished: 500, label: 400 },
+    "1층 창고": { finished: 55, label: 0 }
+  });
+  addItem("00006", "그린메디 / 4L", "finished", {
+    "2층 창고": { finished: 300 },
+    "1층 창고": { finished: 20 }
+  });
+  addItem("00007", "그린메디 / 500ml", "finished", {
+    "2층 창고": { finished: 80 },
+    "1층 창고": { finished: 8 }
+  });
+  addItem("00265", "준스랩 ACC 블루 / 500ml", "finished", {
+    "2층 창고": { finished: 220 },
+    "1층 창고": { finished: 20 }
+  });
+  return items;
+}
+
+function getOrCreateInventoryItem(items, code) {
+  if (!items.has(code)) {
+    const locations = {};
+    MOCK_LOCATIONS.forEach((location) => { locations[location] = emptyFieldMap(); });
+    items.set(code, { code, name: code, field: "finished", stocks: emptyFieldMap(), locations });
+  }
+  return items.get(code);
+}
+
+function applyInventoryWrite(items, itemCode, field, warehouse, after) {
+  if (!itemCode || MOCK_FIELD_KEYS.indexOf(field) < 0) return;
+  const item = getOrCreateInventoryItem(items, itemCode);
+  const location = MOCK_LOCATIONS.indexOf(warehouse) >= 0 ? warehouse : MOCK_LOCATIONS[0];
+  if (!item.locations[location]) item.locations[location] = emptyFieldMap();
+  item.locations[location][field] = Number(after) || 0;
+  item.stocks[field] = MOCK_LOCATIONS.reduce((sum, loc) => sum + Number((item.locations[loc] || {})[field] || 0), 0);
+}
+
+function serializeInventoryItems(items) {
+  return Array.from(items.values()).map((item) => ({
+    code: item.code,
+    name: item.name,
+    field: item.field,
+    stocks: Object.assign({}, item.stocks),
+    locations: Object.keys(item.locations).reduce((acc, location) => {
+      acc[location] = Object.assign({}, item.locations[location]);
+      return acc;
+    }, {})
+  }));
+}
 
 export function createMockProviderServer() {
   const sessions = new Map();
   const saveOperationLog = new Map();
   const quickTransactionIds = new Set();
+  const inventoryItems = createInventoryStore();
   let saveWriteCount = 0;
   let quickWriteCount = 0;
   let lastRequestBody = null;
@@ -78,6 +153,7 @@ export function createMockProviderServer() {
     }
     saveOperationLog.set(operationId, true);
     saveWriteCount += 1;
+    applyInventoryWrite(inventoryItems, job.itemCode, job.field, job.warehouse, job.after);
     return {
       saved: true,
       itemCode: job.itemCode,
@@ -97,6 +173,7 @@ export function createMockProviderServer() {
     }
     quickTransactionIds.add(transactionId);
     quickWriteCount += 1;
+    applyInventoryWrite(inventoryItems, job.itemCode, job.field, job.warehouse, job.after);
     return {
       saved: true,
       transactionId,
@@ -106,6 +183,24 @@ export function createMockProviderServer() {
       action: job.delta > 0 ? "produce" : "dispose",
       qty: Math.abs(Number(job.delta || 0))
     };
+  }
+
+  function handleGetInventory(request) {
+    requireSession(request);
+    return {
+      items: serializeInventoryItems(inventoryItems),
+      locations: MOCK_LOCATIONS.slice(),
+      loadedAt: new Date().toISOString(),
+      buildId: MOCK_BUILD_ID
+    };
+  }
+
+  function handleLogoutOperator(request) {
+    const auth = authCredentials(request);
+    const token = auth.operatorSessionToken;
+    const revoked = !!token && sessions.has(token);
+    if (revoked) sessions.delete(token);
+    return { revoked: revoked ? 1 : 0 };
   }
 
   function handleMockExpireSession(request) {
@@ -120,7 +215,8 @@ export function createMockProviderServer() {
       saveWriteCount,
       quickWriteCount,
       sessionCount: sessions.size,
-      lastRequestBody
+      lastRequestBody,
+      inventorySnapshot: serializeInventoryItems(inventoryItems)
     };
   }
 
@@ -157,6 +253,8 @@ export function createMockProviderServer() {
         if (action === "authenticateOperator") result = handleAuthenticateOperator(request);
         else if (action === "saveStockCount") result = handleSaveStockCount(request);
         else if (action === "quickInventoryCommand") result = handleQuickInventoryCommand(request);
+        else if (action === "getInventory") result = handleGetInventory(request);
+        else if (action === "logoutOperator") result = handleLogoutOperator(request);
         else if (action === "__mockExpireSession") result = handleMockExpireSession(request);
         else if (action === "__mockState") result = handleMockState();
         else throw new Error("Unsupported action: " + (action || "(empty)"));
