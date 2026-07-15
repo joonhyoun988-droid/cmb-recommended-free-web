@@ -168,6 +168,7 @@ let flushTimer = null;
 let lastLatencyMs = 0;
 let pendingQuickCommand = null;
 let liveInventory = { endpoint: "", sessionToken: "", ready: false };
+let cmbBridge = { endpoint: "", frame: null, ready: null, resolveReady: null, pending: new Map() };
 
 const els = {
   operatorLabel: document.getElementById("operatorLabel"),
@@ -948,22 +949,51 @@ function sendJob(job) {
 function postEndpoint(action, payload, endpointOverride) {
   const endpoint = endpointOverride || localStorage.getItem(ENDPOINT_KEY) || "";
   if (!endpoint) return Promise.reject(new Error("Endpoint is not configured"));
-  return fetch(endpoint, {
-    method: "POST",
-    headers: { "content-type": "text/plain;charset=UTF-8" },
-    body: JSON.stringify(Object.assign({ action }, payload || {}))
-  }).then((response) => {
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json().catch(() => ({}));
-  }).then((data) => {
-    if (data && data.ok === false) {
-      const error = new Error(data.error || "Server rejected the request");
-      if (isSessionExpiredMessage(data.error)) error.sessionExpired = true;
-      throw error;
-    }
-    return data;
-  });
+  return ensureCmbBridge(endpoint).then(() => new Promise((resolve, reject) => {
+    const id = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`;
+    const timer = setTimeout(() => {
+      cmbBridge.pending.delete(id);
+      reject(new Error("Google 통신 다리 응답 시간이 초과되었습니다."));
+    }, 30000);
+    cmbBridge.pending.set(id, { resolve, reject, timer });
+    cmbBridge.frame.contentWindow.postMessage({ type: "cmb-rpc", id, action, payload: payload || {} }, "*");
+  }));
 }
+
+function ensureCmbBridge(endpoint) {
+  if (cmbBridge.frame && cmbBridge.endpoint === endpoint) return cmbBridge.ready;
+  if (cmbBridge.frame) cmbBridge.frame.remove();
+  cmbBridge = { endpoint, frame: document.createElement("iframe"), ready: null, resolveReady: null, pending: new Map() };
+  cmbBridge.frame.hidden = true;
+  cmbBridge.frame.title = "CMB secure Google bridge";
+  cmbBridge.ready = new Promise((resolve, reject) => {
+    cmbBridge.resolveReady = resolve;
+    setTimeout(() => reject(new Error("Google 통신 다리를 열지 못했습니다. Google 로그인 상태를 확인하세요.")), 30000);
+  });
+  cmbBridge.frame.src = `${endpoint}?mode=bridge`;
+  document.body.appendChild(cmbBridge.frame);
+  return cmbBridge.ready;
+}
+
+window.addEventListener("message", (event) => {
+  if (!cmbBridge.frame || event.source !== cmbBridge.frame.contentWindow) return;
+  const message = event.data || {};
+  if (message.type === "cmb-bridge-ready") {
+    cmbBridge.resolveReady?.();
+    return;
+  }
+  if (message.type !== "cmb-rpc-result" || !message.id) return;
+  const pending = cmbBridge.pending.get(message.id);
+  if (!pending) return;
+  clearTimeout(pending.timer);
+  cmbBridge.pending.delete(message.id);
+  if (message.ok) pending.resolve(message.result || {});
+  else {
+    const error = new Error(message.error || "Server rejected the request");
+    if (isSessionExpiredMessage(message.error)) error.sessionExpired = true;
+    pending.reject(error);
+  }
+});
 
 function isSessionExpiredMessage(message) {
   return /로그인이 만료되었습니다/.test(String(message || ""));
