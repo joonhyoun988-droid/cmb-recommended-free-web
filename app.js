@@ -168,7 +168,7 @@ let flushTimer = null;
 let lastLatencyMs = 0;
 let pendingQuickCommand = null;
 let liveInventory = { endpoint: "", sessionToken: "", ready: false };
-let cmbBridge = { endpoint: "", frame: null, ready: null, resolveReady: null, pending: new Map() };
+let cmbBridge = { endpoint: "", bridgeWindow: null, ready: null, resolveReady: null, pending: new Map() };
 
 const els = {
   operatorLabel: document.getElementById("operatorLabel"),
@@ -956,27 +956,25 @@ function postEndpoint(action, payload, endpointOverride) {
       reject(new Error("Google 통신 다리 응답 시간이 초과되었습니다."));
     }, 30000);
     cmbBridge.pending.set(id, { resolve, reject, timer });
-    cmbBridge.frame.contentWindow.postMessage({ type: "cmb-rpc", id, action, payload: payload || {} }, "*");
+    cmbBridge.bridgeWindow.postMessage({ type: "cmb-rpc", id, action, payload: payload || {} }, "*");
   }));
 }
 
 function ensureCmbBridge(endpoint) {
-  if (cmbBridge.frame && cmbBridge.endpoint === endpoint) return cmbBridge.ready;
-  if (cmbBridge.frame) cmbBridge.frame.remove();
-  cmbBridge = { endpoint, frame: document.createElement("iframe"), ready: null, resolveReady: null, pending: new Map() };
-  cmbBridge.frame.hidden = true;
-  cmbBridge.frame.title = "CMB secure Google bridge";
+  if (cmbBridge.bridgeWindow && !cmbBridge.bridgeWindow.closed && cmbBridge.endpoint === endpoint) return cmbBridge.ready;
+  if (cmbBridge.bridgeWindow && !cmbBridge.bridgeWindow.closed) cmbBridge.bridgeWindow.close();
+  const bridgeWindow = window.open(`${endpoint}?mode=bridge`, "cmbGoogleBridge", "popup,width=520,height=420");
+  if (!bridgeWindow) return Promise.reject(new Error("Google 연결 창이 차단되었습니다. 팝업을 허용하세요."));
+  cmbBridge = { endpoint, bridgeWindow, ready: null, resolveReady: null, pending: new Map() };
   cmbBridge.ready = new Promise((resolve, reject) => {
     cmbBridge.resolveReady = resolve;
     setTimeout(() => reject(new Error("Google 통신 다리를 열지 못했습니다. Google 로그인 상태를 확인하세요.")), 30000);
   });
-  cmbBridge.frame.src = `${endpoint}?mode=bridge`;
-  document.body.appendChild(cmbBridge.frame);
   return cmbBridge.ready;
 }
 
 window.addEventListener("message", (event) => {
-  if (!cmbBridge.frame || event.source !== cmbBridge.frame.contentWindow) return;
+  if (!cmbBridge.bridgeWindow || event.source !== cmbBridge.bridgeWindow) return;
   const message = event.data || {};
   if (message.type === "cmb-bridge-ready") {
     cmbBridge.resolveReady?.();
