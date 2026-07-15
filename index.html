@@ -277,11 +277,11 @@
           <p>이 앱을 배포한 회사 Google 계정으로 새 6–8자리 PIN을 정합니다.</p>
           <label>
             <span>새 PIN</span>
-            <input id="newPinInput" autocomplete="new-password" inputmode="numeric" pattern="[0-9]{6,8}" type="password">
+            <input id="newPinInput" autocomplete="new-password" inputmode="numeric" maxlength="8" placeholder="숫자 6–8자리" type="password">
           </label>
           <label>
             <span>새 PIN 확인</span>
-            <input id="confirmPinInput" autocomplete="new-password" inputmode="numeric" pattern="[0-9]{6,8}" type="password">
+            <input id="confirmPinInput" autocomplete="new-password" inputmode="numeric" maxlength="8" placeholder="같은 PIN을 다시 입력" type="password">
           </label>
         </div>
         <div class="dialog-actions">
