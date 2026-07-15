@@ -950,7 +950,7 @@ function postEndpoint(action, payload, endpointOverride) {
   if (!endpoint) return Promise.reject(new Error("Endpoint is not configured"));
   return fetch(endpoint, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "text/plain;charset=UTF-8" },
     body: JSON.stringify(Object.assign({ action }, payload || {}))
   }).then((response) => {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
