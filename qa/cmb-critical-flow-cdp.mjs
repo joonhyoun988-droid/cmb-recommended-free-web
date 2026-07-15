@@ -202,6 +202,7 @@ async function runScenario(client) {
 const chrome = spawn(chromePath, [
   "--headless=new",
   "--disable-gpu",
+  "--no-sandbox",
   "--no-first-run",
   "--no-default-browser-check",
   "--remote-debugging-port=0",
