@@ -178,6 +178,11 @@ const els = {
   cancelLoginBtn: document.getElementById("cancelLoginBtn"),
   operatorIdInput: document.getElementById("operatorIdInput"),
   pinInput: document.getElementById("pinInput"),
+  showPinRecoveryBtn: document.getElementById("showPinRecoveryBtn"),
+  pinRecoveryFields: document.getElementById("pinRecoveryFields"),
+  newPinInput: document.getElementById("newPinInput"),
+  confirmPinInput: document.getElementById("confirmPinInput"),
+  loginSubmitBtn: document.getElementById("loginSubmitBtn"),
   quickCommandForm: document.getElementById("quickCommandForm"),
   quickCommandInput: document.getElementById("quickCommandInput"),
   quickCommandPreview: document.getElementById("quickCommandPreview"),
@@ -1073,8 +1078,43 @@ function openLogin() {
 }
 
 function closeLogin() {
+  setPinRecoveryMode(false);
   if (typeof els.loginDialog.close === "function") els.loginDialog.close();
   else els.loginDialog.removeAttribute("open");
+}
+
+function setPinRecoveryMode(enabled) {
+  const active = Boolean(enabled);
+  els.pinRecoveryFields.hidden = !active;
+  els.operatorIdInput.closest("label").hidden = active;
+  els.pinInput.closest("label").hidden = active;
+  els.newPinInput.required = active;
+  els.confirmPinInput.required = active;
+  els.showPinRecoveryBtn.textContent = active ? "로그인으로 돌아가기" : "PIN을 잊으셨나요?";
+  els.loginSubmitBtn.textContent = active ? "새 PIN 저장" : "로그인";
+}
+
+async function recoverOwnerPin(newPin, confirmPin) {
+  const cleanNewPin = String(newPin || "").trim();
+  const cleanConfirmPin = String(confirmPin || "").trim();
+  if (!/^\d{6,8}$/.test(cleanNewPin)) {
+    showToast("새 PIN은 숫자 6–8자리로 입력하세요.");
+    return;
+  }
+  if (cleanNewPin !== cleanConfirmPin) {
+    showToast("새 PIN과 PIN 확인이 일치하지 않습니다.");
+    return;
+  }
+  try {
+    await postEndpoint("recoverOwnerPin", { newPin: cleanNewPin, confirmPin: cleanConfirmPin });
+    els.newPinInput.value = "";
+    els.confirmPinInput.value = "";
+    setPinRecoveryMode(false);
+    showToast("새 PIN이 저장됐습니다. JH001로 로그인하세요.");
+  } catch (error) {
+    console.warn(error);
+    showToast("PIN 복구 실패. 배포한 회사 Google 계정인지 확인하세요.");
+  }
 }
 
 async function login(operatorId, pin) {
@@ -1185,12 +1225,14 @@ function bindEvents() {
   });
   els.loginToggle.addEventListener("click", openLogin);
   els.cancelLoginBtn.addEventListener("click", closeLogin);
+  els.showPinRecoveryBtn.addEventListener("click", () => setPinRecoveryMode(els.pinRecoveryFields.hidden));
   els.logoutBtn.addEventListener("click", () => {
     logout();
   });
   els.loginForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    login(els.operatorIdInput.value, els.pinInput.value);
+    if (!els.pinRecoveryFields.hidden) recoverOwnerPin(els.newPinInput.value, els.confirmPinInput.value);
+    else login(els.operatorIdInput.value, els.pinInput.value);
   });
   els.flushNowBtn.addEventListener("click", flushQueue);
   els.resetDemoBtn.addEventListener("click", resetDemo);
