@@ -1,11 +1,10 @@
 import { spawn } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
 const url = process.argv[2] || "http://127.0.0.1:8767/index.html";
 const chromePath = process.argv[3] || "C:\\Users\\joonh\\.browser-driver-manager\\chrome\\win64-149.0.7827.155\\chrome-win64\\chrome.exe";
-const port = 9400 + Math.floor(Math.random() * 300);
 const profileDir = mkdtempSync(path.join(tmpdir(), "cmb-cdp-"));
 
 function sleep(ms) {
@@ -27,6 +26,22 @@ async function fetchJson(targetUrl, attempts = 60) {
   throw lastError || new Error(`Unable to fetch ${targetUrl}`);
 }
 
+async function readDevToolsPort(attempts = 80) {
+  const activePortPath = path.join(profileDir, "DevToolsActivePort");
+  let lastError;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const port = Number(readFileSync(activePortPath, "utf8").split(/\r?\n/)[0]);
+      if (Number.isInteger(port) && port > 0) return port;
+      lastError = new Error("Invalid DevToolsActivePort value");
+    } catch (error) {
+      lastError = error;
+    }
+    await sleep(250);
+  }
+  throw lastError || new Error("Chrome did not publish DevToolsActivePort");
+}
+
 class CdpClient {
   constructor(ws) {
     this.ws = ws;
@@ -45,8 +60,7 @@ class CdpClient {
 
   send(method, params = {}) {
     const id = ++this.id;
-    this.ws.send(JSON.stringify({ id, method, params }));
-    return new Promise((resolve, reject) => {
+    const promise = new Promise((resolve, reject) => {
       this.pending.set(id, { resolve, reject });
       setTimeout(() => {
         if (this.pending.has(id)) {
@@ -55,6 +69,8 @@ class CdpClient {
         }
       }, 10000);
     });
+    this.ws.send(JSON.stringify({ id, method, params }));
+    return promise;
   }
 }
 
@@ -188,15 +204,22 @@ const chrome = spawn(chromePath, [
   "--disable-gpu",
   "--no-first-run",
   "--no-default-browser-check",
-  `--remote-debugging-port=${port}`,
+  "--remote-debugging-port=0",
+  "--remote-allow-origins=*",
   `--user-data-dir=${profileDir}`,
   "about:blank"
 ], { stdio: "ignore" });
 
 let exitCode = 0;
 try {
-  const pages = await fetchJson(`http://127.0.0.1:${port}/json`);
-  const page = pages.find((entry) => entry.type === "page") || pages[0];
+  const port = await readDevToolsPort();
+  let page;
+  for (let i = 0; i < 40; i++) {
+    const pages = await fetchJson(`http://127.0.0.1:${port}/json`);
+    page = pages.find((entry) => entry.type === "page" && entry.webSocketDebuggerUrl);
+    if (page) break;
+    await sleep(250);
+  }
   if (!page?.webSocketDebuggerUrl) throw new Error("No page websocket found");
   const ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise((resolve, reject) => {
@@ -223,7 +246,7 @@ try {
     passedScenarios: 0,
     failedScenarios: 1,
     checkedAt: new Date().toISOString(),
-    error: error.message
+    error: `${error.message}; chromeExit=${chrome.exitCode}; chromeSignal=${chrome.signalCode}`
   }, null, 2));
 } finally {
   chrome.kill();

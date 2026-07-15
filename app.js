@@ -865,6 +865,15 @@ async function flushQueue() {
     saveState();
     showToast("미전송 저장 1건을 완료했습니다.");
   } catch (error) {
+    if (error.sessionExpired) {
+      job.status = "needs-login";
+      if (state.operator) state.operator.sessionToken = "";
+      saveState();
+      showToast("로그인이 만료되었습니다. 다시 로그인하면 대기 중인 저장이 이어집니다.");
+      console.warn(error);
+      scheduleRender();
+      return;
+    }
     job.status = "retry";
     saveState();
     showToast("서버 저장 실패. 큐에 남겨 다시 보낼 수 있습니다.");
@@ -899,9 +908,17 @@ function postEndpoint(action, payload) {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.json().catch(() => ({}));
   }).then((data) => {
-    if (data && data.ok === false) throw new Error(data.error || "Server rejected the request");
+    if (data && data.ok === false) {
+      const error = new Error(data.error || "Server rejected the request");
+      if (isSessionExpiredMessage(data.error)) error.sessionExpired = true;
+      throw error;
+    }
     return data;
   });
+}
+
+function isSessionExpiredMessage(message) {
+  return /로그인이 만료되었습니다/.test(String(message || ""));
 }
 
 function operatorAuthPayload() {

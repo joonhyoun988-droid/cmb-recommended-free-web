@@ -1146,7 +1146,6 @@ tbody tr:hover {
   }
 
   .operator-box small,
-  .operator-box .ghost-btn.is-muted,
   .nav-list {
     display: none;
   }
