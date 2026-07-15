@@ -2,6 +2,32 @@ const STORAGE_KEY = "cmb.free.web.state.v1";
 const ENDPOINT_KEY = "cmb.free.web.endpoint.v1";
 const SESSION_KEY = "cmb.free.web.operator.v1";
 
+function isTrustedAppsScriptEndpoint(value) {
+  try {
+    const url = new URL(String(value || ""));
+    return url.protocol === "https:"
+      && url.hostname === "script.google.com"
+      && /^\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(url.pathname);
+  } catch (error) {
+    return false;
+  }
+}
+
+function bootstrapEndpointFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  const endpoint = params.get("endpoint");
+  if (!endpoint) return;
+  if (isTrustedAppsScriptEndpoint(endpoint)) {
+    localStorage.setItem(ENDPOINT_KEY, endpoint);
+  }
+  params.delete("endpoint");
+  const query = params.toString();
+  const cleanUrl = window.location.pathname + (query ? `?${query}` : "") + window.location.hash;
+  window.history.replaceState({}, document.title, cleanUrl);
+}
+
+bootstrapEndpointFromQuery();
+
 const defaultState = {
   operator: null,
   queue: [],
