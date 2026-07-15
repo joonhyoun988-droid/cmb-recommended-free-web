@@ -1111,7 +1111,7 @@ async function login(operatorId, pin) {
       if (ready && state.queue.length) scheduleFlush();
     } catch (error) {
       console.warn(error);
-      showToast("서버 로그인 실패. 작업자 ID/PIN 또는 배포 권한을 확인하세요.");
+      showToast(`서버 로그인 실패: ${error && error.message ? error.message : "작업자 ID/PIN 또는 배포 권한을 확인하세요."}`);
     }
     return;
   }
