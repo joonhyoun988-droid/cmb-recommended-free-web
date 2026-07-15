@@ -954,6 +954,7 @@ function postEndpoint(action, payload, endpointOverride) {
   if (!endpoint) return Promise.reject(new Error("Endpoint is not configured"));
   return fetch(endpoint, {
     method: "POST",
+    credentials: "include",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(Object.assign({ action }, payload || {}))
   }).then((response) => {
