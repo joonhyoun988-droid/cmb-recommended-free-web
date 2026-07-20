@@ -13,6 +13,16 @@ function isTrustedAppsScriptEndpoint(value) {
   }
 }
 
+function isLocalTestEndpoint(value) {
+  try {
+    const url = new URL(String(value || ""));
+    return ["http:", "https:"].includes(url.protocol)
+      && ["127.0.0.1", "localhost"].includes(url.hostname);
+  } catch (error) {
+    return false;
+  }
+}
+
 function bootstrapEndpointFromQuery() {
   const params = new URLSearchParams(window.location.search);
   const endpoint = params.get("endpoint");
@@ -949,6 +959,23 @@ function sendJob(job) {
 function postEndpoint(action, payload, endpointOverride) {
   const endpoint = endpointOverride || localStorage.getItem(ENDPOINT_KEY) || "";
   if (!endpoint) return Promise.reject(new Error("Endpoint is not configured"));
+  if (isLocalTestEndpoint(endpoint)) {
+    return fetch(endpoint, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(Object.assign({ action }, payload || {}))
+    }).then((response) => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json().catch(() => ({}));
+    }).then((data) => {
+      if (data && data.ok === false) {
+        const error = new Error(data.error || "Server rejected the request");
+        if (isSessionExpiredMessage(data.error)) error.sessionExpired = true;
+        throw error;
+      }
+      return data;
+    });
+  }
   return ensureCmbBridge(endpoint).then(() => new Promise((resolve, reject) => {
     const id = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`;
     const timer = setTimeout(() => {
