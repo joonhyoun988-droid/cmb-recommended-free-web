@@ -23,6 +23,18 @@ function isLocalTestEndpoint(value) {
   }
 }
 
+function isTrustedCmbBridgeOrigin(value) {
+  try {
+    const origin = String(value || "");
+    const url = new URL(origin);
+    return url.protocol === "https:"
+      && url.origin === origin
+      && ["script.google.com", "script.googleusercontent.com"].includes(url.hostname);
+  } catch (error) {
+    return false;
+  }
+}
+
 function bootstrapEndpointFromQuery() {
   const params = new URLSearchParams(window.location.search);
   const endpoint = params.get("endpoint");
@@ -178,7 +190,7 @@ let flushTimer = null;
 let lastLatencyMs = 0;
 let pendingQuickCommand = null;
 let liveInventory = { endpoint: "", sessionToken: "", ready: false };
-let cmbBridge = { endpoint: "", bridgeWindow: null, ready: null, resolveReady: null, pending: new Map() };
+let cmbBridge = { endpoint: "", bridgeWindow: null, bridgeOrigin: "", ready: null, resolveReady: null, pending: new Map() };
 
 const els = {
   operatorLabel: document.getElementById("operatorLabel"),
@@ -983,7 +995,16 @@ function postEndpoint(action, payload, endpointOverride) {
       reject(new Error("Google 통신 다리 응답 시간이 초과되었습니다."));
     }, 30000);
     cmbBridge.pending.set(id, { resolve, reject, timer });
-    cmbBridge.bridgeWindow.postMessage({ type: "cmb-rpc", id, action, payload: payload || {} }, "*");
+    if (!cmbBridge.bridgeOrigin) {
+      clearTimeout(timer);
+      cmbBridge.pending.delete(id);
+      reject(new Error("Trusted Google bridge origin is unavailable"));
+      return;
+    }
+    cmbBridge.bridgeWindow.postMessage(
+      { type: "cmb-rpc", id, action, payload: payload || {} },
+      cmbBridge.bridgeOrigin
+    );
   }));
 }
 
@@ -992,7 +1013,7 @@ function ensureCmbBridge(endpoint) {
   if (cmbBridge.bridgeWindow && !cmbBridge.bridgeWindow.closed) cmbBridge.bridgeWindow.close();
   const bridgeWindow = window.open(`${endpoint}?mode=bridge`, "cmbGoogleBridge", "popup,width=520,height=420");
   if (!bridgeWindow) return Promise.reject(new Error("Google 연결 창이 차단되었습니다. 팝업을 허용하세요."));
-  cmbBridge = { endpoint, bridgeWindow, ready: null, resolveReady: null, pending: new Map() };
+  cmbBridge = { endpoint, bridgeWindow, bridgeOrigin: "", ready: null, resolveReady: null, pending: new Map() };
   cmbBridge.ready = new Promise((resolve, reject) => {
     cmbBridge.resolveReady = resolve;
     setTimeout(() => reject(new Error("Google 통신 다리를 열지 못했습니다. Google 로그인 상태를 확인하세요.")), 30000);
@@ -1004,9 +1025,12 @@ window.addEventListener("message", (event) => {
   if (!cmbBridge.bridgeWindow || event.source !== cmbBridge.bridgeWindow) return;
   const message = event.data || {};
   if (message.type === "cmb-bridge-ready") {
+    if (!isTrustedCmbBridgeOrigin(event.origin)) return;
+    cmbBridge.bridgeOrigin = event.origin;
     cmbBridge.resolveReady?.();
     return;
   }
+  if (!cmbBridge.bridgeOrigin || event.origin !== cmbBridge.bridgeOrigin) return;
   if (message.type !== "cmb-rpc-result" || !message.id) return;
   const pending = cmbBridge.pending.get(message.id);
   if (!pending) return;
